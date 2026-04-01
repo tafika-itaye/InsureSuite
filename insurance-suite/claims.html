@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claims — InsureSuite</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-mount"></div>
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-breadcrumb">
+        <span>InsureSuite</span><span class="sep">›</span>
+        <span class="crumb-current">Claims Management</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="branch-badge">🏢 <span id="topbar-branch">Blantyre HQ</span></div>
+        <div class="topbar-divider"></div>
+        <button class="topbar-btn outline" onclick="showToast('Exporting claims report…','success')">📥 Export</button>
+        <button class="topbar-btn" onclick="openModal('newClaimModal')">+ New Claim</button>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">Claims Management</div>
+          <div class="page-subtitle">Register, track, assess, and settle all insurance claims</div>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-grid mb-24">
+        <div class="stat-card"><div class="stat-accent blue"></div><div class="stat-icon">📋</div><div class="stat-value">148</div><div class="stat-label">Total Active Claims</div></div>
+        <div class="stat-card"><div class="stat-accent orange"></div><div class="stat-icon">🔎</div><div class="stat-value">41</div><div class="stat-label">Under Assessment</div></div>
+        <div class="stat-card"><div class="stat-accent green"></div><div class="stat-icon">✅</div><div class="stat-value">94</div><div class="stat-label">Settled (MTD)</div></div>
+        <div class="stat-card"><div class="stat-accent red"></div><div class="stat-icon">⚠️</div><div class="stat-value">5</div><div class="stat-label">Overdue &gt;48 hrs</div></div>
+      </div>
+
+      <!-- FILTERS -->
+      <div class="card mb-24">
+        <div class="card-body" style="padding:14px 20px">
+          <div class="filter-row">
+            <div class="search-bar"><span class="search-icon">🔍</span><input type="text" placeholder="Search claims…" id="claimsSearch"></div>
+            <select class="filter-select" id="statusFilter" onchange="filterClaims()">
+              <option value="">All Statuses</option>
+              <option>Open</option>
+              <option>Under Review</option>
+              <option>Pending Approval</option>
+              <option>Settled</option>
+              <option>Rejected</option>
+            </select>
+            <select class="filter-select" onchange="filterClaims()">
+              <option value="">All Classes</option>
+              <option>Motor</option>
+              <option>Property</option>
+              <option>Life</option>
+              <option>Medical</option>
+              <option>Marine</option>
+            </select>
+            <select class="filter-select" onchange="filterClaims()">
+              <option value="">All Branches</option>
+              <option>Blantyre HQ</option>
+              <option>Lilongwe Branch</option>
+              <option>Mzuzu Branch</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">Claims Register</div><div class="card-subtitle">Showing 15 of 148 records</div></div>
+          <div class="card-actions">
+            <div class="tabs" style="border:none;margin:0">
+              <div class="tab active" onclick="setTab(this,'all')">All</div>
+              <div class="tab" onclick="setTab(this,'open')">Open</div>
+              <div class="tab" onclick="setTab(this,'review')">Under Review</div>
+              <div class="tab" onclick="setTab(this,'settled')">Settled</div>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="claimsTable">
+            <thead><tr>
+              <th data-sort>Claim No.</th>
+              <th data-sort>Policyholder</th>
+              <th data-sort>Class</th>
+              <th data-sort>Date of Loss</th>
+              <th data-sort>Reported</th>
+              <th data-sort>Reserve (MWK)</th>
+              <th data-sort>Assessor</th>
+              <th data-sort>Status</th>
+              <th>Actions</th>
+            </tr></thead>
+            <tbody id="claimsTbody">
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <span class="text-sm text-muted">Page 1 of 10</span>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-xs">‹ Prev</button>
+            <button class="btn btn-primary btn-xs">1</button>
+            <button class="btn btn-ghost btn-xs">2</button>
+            <button class="btn btn-ghost btn-xs">3</button>
+            <button class="btn btn-ghost btn-xs">Next ›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW CLAIM MODAL -->
+<div class="modal-overlay" id="newClaimModal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <div class="modal-title">📋 Register New Claim — FNOL</div>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <form class="ajax-form">
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">Policy Number *</label><input type="text" class="form-control" placeholder="POL-2026-XXXX"></div>
+          <div class="form-group"><label class="form-label">Policyholder Name *</label><input type="text" class="form-control" placeholder="Full name"></div>
+          <div class="form-group"><label class="form-label">Class of Business *</label>
+            <select class="form-control"><option>Motor</option><option>Property</option><option>Life</option><option>Medical</option><option>Marine</option><option>Fire &amp; General</option></select></div>
+          <div class="form-group"><label class="form-label">Date of Loss *</label><input type="date" class="form-control"></div>
+          <div class="form-group"><label class="form-label">Date Reported</label><input type="date" class="form-control"></div>
+          <div class="form-group"><label class="form-label">Estimated Loss (MWK)</label><input type="number" class="form-control" placeholder="0.00"></div>
+          <div class="form-group"><label class="form-label">Branch</label>
+            <select class="form-control"><option>Blantyre HQ</option><option>Lilongwe Branch</option><option>Mzuzu Branch</option></select></div>
+          <div class="form-group"><label class="form-label">Assign Assessor</label>
+            <select class="form-control"><option>— Unassigned —</option><option>Peter Mwale</option><option>Grace Kachingwe</option><option>Joseph Tembo</option></select></div>
+        </div>
+        <div class="form-group"><label class="form-label">Description of Loss / Circumstances *</label>
+          <textarea class="form-control" rows="3" placeholder="Describe the incident, cause of loss, and initial circumstances…"></textarea></div>
+        <div class="form-group"><label class="form-label">Priority</label>
+          <select class="form-control"><option>Normal</option><option>High</option><option>Urgent</option></select></div>
+        <div class="modal-footer" style="padding:0;border:none;margin-top:8px">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('newClaimModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Register Claim</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW CLAIM MODAL -->
+<div class="modal-overlay" id="viewClaimModal">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <div class="modal-title" id="viewClaimTitle">Claim Details</div>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab(this,'claimInfo')">Overview</div>
+        <div class="tab" onclick="switchTab(this,'claimTimeline')">Timeline</div>
+        <div class="tab" onclick="switchTab(this,'claimDocs')">Documents</div>
+      </div>
+      <div id="claimInfo">
+        <div class="grid-2">
+          <div class="info-row" id="claimInfoLeft"></div>
+          <div class="info-row" id="claimInfoRight"></div>
+        </div>
+      </div>
+      <div id="claimTimeline" style="display:none">
+        <div class="timeline">
+          <div class="tl-item"><div class="tl-line"><div class="tl-dot done"></div><div class="tl-connector"></div></div><div class="tl-content"><div class="tl-title">FNOL Registered</div><div class="tl-meta">Auto-generated claim number assigned • System</div></div></div>
+          <div class="tl-item"><div class="tl-line"><div class="tl-dot done"></div><div class="tl-connector"></div></div><div class="tl-content"><div class="tl-title">Assessor Assigned</div><div class="tl-meta">Peter Mwale assigned • Grace Kachingwe • +1 day</div></div></div>
+          <div class="tl-item"><div class="tl-line"><div class="tl-dot"></div><div class="tl-connector"></div></div><div class="tl-content"><div class="tl-title">Assessment In Progress</div><div class="tl-meta">Site visit scheduled • Pending report</div></div></div>
+          <div class="tl-item"><div class="tl-line"><div class="tl-dot warn"></div><div class="tl-connector"></div></div><div class="tl-content"><div class="tl-title">Approval Pending</div><div class="tl-meta">Awaiting manager sign-off on reserve</div></div></div>
+          <div class="tl-item"><div class="tl-line"><div class="tl-dot" style="background:var(--border);box-shadow:0 0 0 2px var(--border)"></div></div><div class="tl-content"><div class="tl-title" style="color:var(--text-muted)">Settlement</div><div class="tl-meta">Not yet reached</div></div></div>
+        </div>
+      </div>
+      <div id="claimDocs" style="display:none">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="flex-between" style="padding:10px 12px;background:var(--bg);border-radius:var(--radius)"><span>📄 FNOL_Form_CLM2026.pdf</span><button class="btn btn-ghost btn-xs" onclick="showToast('Downloading…','success')">Download</button></div>
+          <div class="flex-between" style="padding:10px 12px;background:var(--bg);border-radius:var(--radius)"><span>📷 Photos_Site_Visit.zip</span><button class="btn btn-ghost btn-xs" onclick="showToast('Downloading…','success')">Download</button></div>
+          <div class="flex-between" style="padding:10px 12px;background:var(--bg);border-radius:var(--radius)"><span>📋 Assessment_Report_Draft.docx</span><button class="btn btn-ghost btn-xs" onclick="showToast('Downloading…','success')">Download</button></div>
+        </div>
+        <button class="btn btn-outline btn-sm mt-16" onclick="showToast('File upload dialog would open here.','info')">+ Upload Document</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('viewClaimModal')">Close</button>
+      <button class="btn btn-outline" onclick="showToast('Claim status updated.','success')">Update Status</button>
+      <button class="btn btn-primary" onclick="showToast('Claim approved and forwarded.','success')">Approve &amp; Forward</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/shared-nav.js"></script>
+<script>
+const claims = [
+  {id:'CLM-2026-0148',holder:'Chisomo Trading Ltd',cls:'Motor',dol:'15 Mar 2026',rep:'17 Mar 2026',reserve:5400000,assessor:'Peter Mwale',status:'Open',branch:'Blantyre HQ'},
+  {id:'CLM-2026-0147',holder:'Ruth Gondwe',cls:'Medical',dol:'12 Mar 2026',rep:'13 Mar 2026',reserve:1800000,assessor:'Grace Kachingwe',status:'Under Review',branch:'Lilongwe Branch'},
+  {id:'CLM-2026-0146',holder:'Sunrise Logistics',cls:'Marine',dol:'10 Mar 2026',rep:'11 Mar 2026',reserve:18500000,assessor:'Joseph Tembo',status:'Pending Approval',branch:'Blantyre HQ'},
+  {id:'CLM-2026-0145',holder:'Patrick Nyirenda',cls:'Property',dol:'08 Mar 2026',rep:'09 Mar 2026',reserve:9200000,assessor:'Peter Mwale',status:'Settled',branch:'Mzuzu Branch'},
+  {id:'CLM-2026-0144',holder:'Malawi Breweries',cls:'Fire & General',dol:'05 Mar 2026',rep:'06 Mar 2026',reserve:42000000,assessor:'Joseph Tembo',status:'Under Review',branch:'Blantyre HQ'},
+  {id:'CLM-2026-0143',holder:'Alice Msowoya',cls:'Life',dol:'01 Mar 2026',rep:'03 Mar 2026',reserve:6500000,assessor:'Grace Kachingwe',status:'Open',branch:'Lilongwe Branch'},
+  {id:'CLM-2026-0142',holder:'Central Hospital',cls:'Medical',dol:'28 Feb 2026',rep:'01 Mar 2026',reserve:3200000,assessor:'Peter Mwale',status:'Settled',branch:'Lilongwe Branch'},
+  {id:'CLM-2026-0141',holder:'Kondwani Enterprises',cls:'Motor',dol:'25 Feb 2026',rep:'26 Feb 2026',reserve:7800000,assessor:'Joseph Tembo',status:'Rejected',branch:'Blantyre HQ'},
+  {id:'CLM-2026-0140',holder:'Green Valley Farm',cls:'Fire & General',dol:'22 Feb 2026',rep:'24 Feb 2026',reserve:28000000,assessor:'Grace Kachingwe',status:'Pending Approval',branch:'Mzuzu Branch'},
+  {id:'CLM-2026-0139',holder:'Samuel Phiri',cls:'Motor',dol:'20 Feb 2026',rep:'20 Feb 2026',reserve:2100000,assessor:'Peter Mwale',status:'Settled',branch:'Blantyre HQ'},
+  {id:'CLM-2026-0138',holder:'Zambia Sunbird',cls:'Property',dol:'18 Feb 2026',rep:'19 Feb 2026',reserve:15000000,assessor:'Joseph Tembo',status:'Under Review',branch:'Lilongwe Branch'},
+  {id:'CLM-2026-0137',holder:'Diana Kalilombe',cls:'Medical',dol:'15 Feb 2026',rep:'16 Feb 2026',reserve:980000,assessor:'Grace Kachingwe',status:'Settled',branch:'Blantyre HQ'},
+  {id:'CLM-2026-0136',holder:'Peoples Trading',cls:'Marine',dol:'12 Feb 2026',rep:'13 Feb 2026',reserve:33000000,assessor:'Joseph Tembo',status:'Open',branch:'Blantyre HQ'},
+  {id:'CLM-2026-0135',holder:'John Kamwendo',cls:'Life',dol:'10 Feb 2026',rep:'10 Feb 2026',reserve:5000000,assessor:'Peter Mwale',status:'Pending Approval',branch:'Mzuzu Branch'},
+  {id:'CLM-2026-0134',holder:'Bright Futures School',cls:'Property',dol:'05 Feb 2026',rep:'06 Feb 2026',reserve:11500000,assessor:'— Unassigned —',status:'Open',branch:'Mzuzu Branch'},
+];
+
+const statusBadge = {
+  'Open':'badge-info','Under Review':'badge-review','Pending Approval':'badge-pending',
+  'Settled':'badge-settled','Rejected':'badge-rejected'
+};
+
+function renderClaims(data) {
+  const tbody = document.getElementById('claimsTbody');
+  tbody.innerHTML = data.map(c => `
+    <tr>
+      <td class="mono"><a href="#" style="color:var(--blue);font-weight:600" onclick="viewClaim('${c.id}');return false">${c.id}</a></td>
+      <td>${c.holder}</td>
+      <td><span class="tag">${c.cls}</span></td>
+      <td>${c.dol}</td>
+      <td>${c.rep}</td>
+      <td class="text-bold">MK ${c.reserve.toLocaleString()}</td>
+      <td>${c.assessor === '— Unassigned —' ? '<span style="color:var(--danger)">⚠ Unassigned</span>' : c.assessor}</td>
+      <td><span class="badge ${statusBadge[c.status]||'badge-info'}">${c.status}</span></td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-xs" onclick="viewClaim('${c.id}')">View</button>
+          <button class="btn btn-outline btn-xs" onclick="showToast('Status updated for ${c.id}.','success')">Update</button>
+        </div>
+      </td>
+    </tr>`).join('');
+  initTableSort();
+}
+
+function viewClaim(id) {
+  const c = claims.find(x=>x.id===id);
+  if (!c) return;
+  document.getElementById('viewClaimTitle').textContent = '📋 ' + c.id + ' — ' + c.holder;
+  document.getElementById('claimInfoLeft').innerHTML = [
+    ['Claim Number', c.id], ['Policyholder', c.holder], ['Class of Business', c.cls],
+    ['Date of Loss', c.dol], ['Date Reported', c.rep], ['Branch', c.branch]
+  ].map(([l,v]) => `<div class="info-item"><span class="info-label">${l}</span><span class="info-value">${v}</span></div>`).join('');
+  document.getElementById('claimInfoRight').innerHTML = [
+    ['Reserve (MWK)', 'MK ' + c.reserve.toLocaleString()], ['Assessor', c.assessor],
+    ['Status', `<span class="badge ${statusBadge[c.status]||''}">${c.status}</span>`],
+    ['Priority', 'Normal'], ['Settlement Amount', '—'], ['Closure Date', '—']
+  ].map(([l,v]) => `<div class="info-item"><span class="info-label">${l}</span><span class="info-value">${v}</span></div>`).join('');
+  // Reset tabs
+  document.querySelectorAll('#viewClaimModal .tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('#viewClaimModal .tab')[0].classList.add('active');
+  ['claimInfo','claimTimeline','claimDocs'].forEach((id,i)=>document.getElementById(id).style.display=i===0?'block':'none');
+  openModal('viewClaimModal');
+}
+
+function switchTab(el, target) {
+  el.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['claimInfo','claimTimeline','claimDocs'].forEach(id => {
+    document.getElementById(id).style.display = id===target ? 'block' : 'none';
+  });
+}
+
+function filterClaims() {
+  const q = document.getElementById('claimsSearch').value.toLowerCase();
+  const s = document.getElementById('statusFilter').value;
+  const filtered = claims.filter(c =>
+    (c.id+c.holder+c.cls+c.branch).toLowerCase().includes(q) &&
+    (!s || c.status === s)
+  );
+  renderClaims(filtered);
+}
+
+function setTab(el, type) {
+  el.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const map = {all:null,open:'Open',review:'Under Review',settled:'Settled'};
+  document.getElementById('statusFilter').value = map[type] || '';
+  filterClaims();
+}
+
+document.getElementById('claimsSearch').addEventListener('input', filterClaims);
+renderClaims(claims);
+</script>
+</body>
+</html>
