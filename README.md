@@ -1,26 +1,60 @@
-# TechNexus Insurance Suite Mockup
+# InsureSuite — TechNexus Malawi
+## Delivery Package v0.1 (Partial — Credits Exhausted)
 
-Responsive HTML/CSS/JS mockup for a control-driven insurance operations suite.
+---
 
-## Files
+### 📁 Folder Structure
 
-- `index.html` — single-page mockup shell with routed module views
-- `css/styles.css` — Fluent-inspired responsive UI styles
-- `js/data.js` — dummy data for policies, claims, transfers, documents, CRM, and reports
-- `js/app.js` — navigation, view rendering, drawer interactions, and lightweight search
-- `manifest.json` — optional install metadata for mobile-friendly preview
+```
+delivery/
+├── documents/
+│   ├── TechNexus_Business_Proposal_INS_2026.docx
+│   ├── TechNexus_Quotation_TNX-INS-2026-031.docx
+│   └── TechNexus_Technical_Concept_Note_INS_2026.docx
+└── insurance-suite/
+    ├── index.html          ← Login page (COMPLETE)
+    ├── css/
+    │   └── style.css       ← Full design system (COMPLETE)
+    └── js/
+        ├── app.js          ← Charts, modals, tables, toasts (COMPLETE)
+        └── shared-nav.js   ← Sidebar + session nav (COMPLETE)
+```
 
-## Deployment to GitHub Pages
+---
 
-1. Create a new GitHub repository.
-2. Upload all files and folders in this project.
-3. Go to **Settings → Pages**.
-4. Under **Build and deployment**, choose **Deploy from a branch**.
-5. Select the `main` branch and `/root` folder.
-6. Save, then wait for Pages to publish.
+### ✅ What Is Complete
 
-## Notes
+**Documents (all 3 — fully formatted, MWK @ $1=MWK1,800, TechNexus branding):**
+- Business Proposal — Mid-Tier Insurance Operations Suite
+- Formal Quotation — TNX-INS-2026-031 (itemised, MWK, payment schedule)
+- Technical Concept Note — architecture, stack, risks, implementation phases
 
-- This is a front-end demonstration only.
-- It is intentionally shaped for later migration into ASP.NET Core with a SQL Server backend.
-- All data is dummy data for presentation and workflow preview.
+**Web Application — Foundation (complete):**
+- `index.html` — Login page, dual-panel Microsoft Fluent design, role quick-login buttons
+- `css/style.css` — Full design system: Microsoft blue/navy palette, TechNexus branding, sidebar, topbar, cards, tables, badges, modals, forms, charts
+- `js/app.js` — Canvas bar/line/donut charts, modal engine, toast notifications, table sort & search
+- `js/shared-nav.js` — Session-aware sidebar, role injection, active nav state
+
+---
+
+### 🔄 Remaining Pages (to be built in next session)
+- `dashboard.html` — KPI cards, charts, activity feed
+- `claims.html` — Claims lifecycle management
+- `policies.html` — Policy administration
+- `portfolio.html` — Portfolio transfer control
+- `documents.html` — Document repository
+- `crm.html` — CRM & renewals pipeline
+- `audit.html` — Audit trail & reports
+
+---
+
+### 🚀 GitHub Deployment
+1. Create a new GitHub repo (e.g. `insuresuite`)
+2. Upload all files preserving folder structure
+3. Enable GitHub Pages → Source: `main` branch → `/ (root)`
+4. Visit: `https://yourusername.github.io/insuresuite/insurance-suite/`
+
+---
+
+**TechNexus Malawi** | BRN.A6SNWQY | MANePS Active | PPDA Registered  
++265 889 941 700 | technexus_mw@proton.me | www.technexusmw.com | Blantyre, Malawi
