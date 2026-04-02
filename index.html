@@ -2,47 +2,206 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>InsureSuite – Login</title>
-  <link rel="stylesheet" href="css/style.css" />
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #003366 url("img/splash/splash-bg.jpg") no-repeat center center;
+      background-size: cover;
+      color: #fff;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Splash overlay */
+    .splash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0, 51, 102, 0.85);
+      z-index: 2000;
+      text-align: center;
+    }
+
+    .splash-logo {
+      font-size: 2.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .splash-tag {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .splash-btn {
+      margin-top: 1.2rem;
+      padding: 0.6rem 1.4rem;
+      font-size: 0.95rem;
+      border: 2px solid #fff;
+      border-radius: 0.3rem;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .splash-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .splash-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* Login container */
+    .login-container {
+      position: relative;
+      z-index: 1;
+      max-width: 420px;
+      margin: 4rem auto;
+      padding: 2rem 2rem 2.5rem;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 0.5rem;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      color: #003366;
+    }
+
+    .login-container h1 {
+      margin-top: -0.2rem;
+      text-align: center;
+      color: #003366;
+    }
+
+    .login-container p {
+      text-align: center;
+      font-size: 0.9rem;
+      opacity: 0.75;
+    }
+
+    /* Form */
+    .login-form {
+      margin-top: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+      color: #003366;
+    }
+
+    select,
+    input,
+    button {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #d1d7e0;
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #212529;
+    }
+
+    select:focus,
+    input:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+
+    .btn-primary {
+      background: #007bff;
+      color: #fff;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background: #0069d9;
+    }
+
+    /* Dashboard link */
+    .dashboard-link {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .dashboard-link a {
+      color: #003366;
+      text-decoration: underline;
+    }
+  </style>
 </head>
-<body class="auth-page">
+<body>
 
-  <div class="login-container">
-    <header class="suite-header">
-      <h1>InsureSuite</h1>
-      <p>Mid‑Tier Insurance Operations Suite</p>
-    </header>
+  <!-- Splash Screen -->
+  <div id="splashScreen" class="splash">
+    <div class="splash-logo">
+      InsureSuite
+    </div>
+    <div class="splash-tag">
+      Mid‑Tier Insurance Operations Suite – TechNexus Malawi
+    </div>
+    <button id="splashContinueBtn" class="splash-btn">
+      Continue
+    </button>
+  </div>
 
-    <form id="loginForm" class="login-form">
-      <h2>Select User Role</h2>
+  <!-- Main login content -->
+  <div id="mainContent" class="app-content" style="display:none;">
+    <div class="login-container">
+      <header>
+        <h1>InsureSuite</h1>
+        <p>Mid‑Tier Insurance Operations Suite</p>
+      </header>
 
-      <div class="form-group">
-        <label for="branchSelect">Branch</label>
-        <select id="branchSelect" required>
-          <!-- Options will be filled by JS -->
-        </select>
-      </div>
+      <form id="loginForm" class="login-form">
+        <h2>Select User Role</h2>
 
-      <div class="form-group">
-        <label for="roleSelect">Role</label>
-        <select id="roleSelect" required>
-          <option value="">-- Select Role --</option>
-          <option value="SuperAdmin">Super Admin</option>
-          <option value="BranchManager">Branch Manager</option>
-          <option value="Underwriter">Underwriter</option>
-          <option value="ClaimsHandler">Claims Handler</option>
-          <option value="FrontDesk">Front Desk</option>
-          <option value="ReadOnly">Read‑Only</option>
-        </select>
-      </div>
+        <div class="form-group">
+          <label for="branchSelect">Branch</label>
+          <select id="branchSelect" required>
+            <!-- JS will fill options -->
+          </select>
+        </div>
 
-      <button type="submit" class="btn btn-primary">Start Session</button>
-    </form>
+        <div class="form-group">
+          <label for="roleSelect">Role</label>
+          <select id="roleSelect" required>
+            <option value="">-- Select Role --</option>
+            <option value="SuperAdmin">Super Admin</option>
+            <option value="BranchManager">Branch Manager</option>
+            <option value="Underwriter">Underwriter</option>
+            <option value="ClaimsHandler">Claims Handler</option>
+            <option value="FrontDesk">Front Desk</option>
+            <option value="ReadOnly">Read‑Only</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Start Session</button>
+
+        <div class="dashboard-link">
+          Already logged in? <a href="dashboard.html">Go straight to Dashboard</a>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- Dummy data -->
   <script>
-    // Make sure data is available at window.data
     window.data = {
       branches: [
         { id: 1, name: "Head Office – Blantyre", code: "BO" },
@@ -82,8 +241,6 @@
   <!-- App logic -->
   <script>
     const app = {
-      currentSession: null,
-
       init: function () {
         this.loadBranchDropdown();
         this.initLogin();
@@ -131,7 +288,12 @@
             return;
           }
 
-          const sess = { branchId, role, userId: user.id };
+          const sess = {
+            branchId: branchId,
+            role: role,
+            userId: user.id,
+            timestamp: Date.now()
+          };
           localStorage.setItem("insuresuite-session", JSON.stringify(sess));
 
           window.location = "dashboard.html";
@@ -139,9 +301,21 @@
       }
     };
 
-    // Run only when DOM is ready
+    // Run when the DOM is ready
     document.addEventListener("DOMContentLoaded", () => {
-      app.init();
+      const splash  = document.getElementById("splashScreen");
+      const btn     = document.getElementById("splashContinueBtn");
+
+      btn.addEventListener("click", () => {
+        splash.style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+      });
+
+      // Auto‑hide splash after 3 seconds
+      setTimeout(() => {
+        splash.style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+      }, 3000);
     });
   </script>
 </body>
