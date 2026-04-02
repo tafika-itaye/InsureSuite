@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>InsureSuite – Policies</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="policies-page">
+  <header class="suite-header">
+    <h1>InsureSuite</h1>
+    <div class="user-nav">
+      <span id="currentRole"></span> •
+      <a href="index.html" id="logoutBtn">Logout</a>
+    </div>
+  </header>
+
+  <nav class="main-menu">
+    <a href="dashboard.html" class="menu-item">Dashboard</a>
+    <a href="claims.html" class="menu-item">Claims</a>
+    <a href="policies.html" class="menu-item active">Policies</a>
+    <a href="crm.html" class="menu-item">CRM & Renewals</a>
+    <a href="portfolio.html" class="menu-item">Portfolio</a>
+    <a href="documents.html" class="menu-item">Documents</a>
+    <a href="admin.html" class="menu-item">Admin</a>
+  </nav>
+
+  <main class="policies-main">
+    <section class="section-header">
+      <h2>Policies</h2>
+      <button id="newPolicyBtn" class="btn btn-primary">Issue New Policy</button>
+    </section>
+
+    <div id="newPolicyForm" class="form-card" style="display:none;">
+      <h3>Issue Policy</h3>
+      <form id="issuePolicyForm">
+        <div class="form-row">
+          <label>Customer / Entity</label>
+          <input type="text" id="policyCustomerInput" required />
+        </div>
+        <div class="form-row">
+          <label>Policy Class</label>
+          <select id="policyClassSelect" required>
+            <option value="Motor">Motor</option>
+            <option value="Fire">Fire</option>
+            <option value="Life">Life</option>
+            <option value="Health">Health</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Inception Date</label>
+          <input type="date" id="policyInceptionDate" required />
+        </div>
+        <div class="form-row">
+          <label>Expiry Date</label>
+          <input type="date" id="policyExpiryDate" required />
+        </div>
+        <div class="form-row">
+          <label>Sum Insured</label>
+          <input type="number" id="policySumInsured" min="0" step="1000" required />
+        </div>
+        <div class="form-row">
+          <label>Premium</label>
+          <input type="number" id="policyPremium" min="0" step="50" required />
+        </div>
+        <div class="form-row">
+          <button type="submit" class="btn btn-primary">Issue Policy</button>
+          <button type="button" id="cancelPolicyBtn" class="btn btn-secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <table id="policiesTable" class="data-table">
+      <thead>
+        <tr>
+          <th>Policy #</th>
+          <th>Customer</th>
+          <th>Class</th>
+          <th>Inception</th>
+          <th>Expiry</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <!-- Endorsements (below the table) -->
+    <section id="endorsementsSection" style="display:none;">
+      <h3>Endorsements – Policy <span id="endorsementPolicyNo"></span></h3>
+      <button id="newEndorsementBtn" class="btn btn-primary">Add Endorsement</button>
+
+      <div id="newEndorsementForm" class="form-card" style="display:none;">
+        <h4>Add New Endorsement</h4>
+        <form id="endorsementForm">
+          <div class="form-row">
+            <label>Type</label>
+            <select id="endorsementType" required>
+              <option value="SumInsuredIncrease">Sum Insured Increase</option>
+              <option value="PremiumAdjustment">Premium Adjustment</option>
+              <option value="NameChange">Name Change</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Description</label>
+            <textarea id="endorsementDesc" rows="3" required></textarea>
+          </div>
+          <div class="form-row">
+            <button type="submit" class="btn btn-primary">Save Endorsement</button>
+            <button type="button" id="cancelEndorsementBtn" class="btn btn-secondary">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <table id="endorsementsTable" class="data-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Effective Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!app.hasSession()) {
+        window.location = "index.html";
+        return;
+      }
+
+      app.updateMainMenu();
+
+      const currentRole = document.getElementById("currentRole");
+      if (currentRole && app.currentSession) {
+        currentRole.textContent = app.currentSession.role;
+      }
+
+      // Toggle new policy form
+      const newPolicyBtn = document.getElementById("newPolicyBtn");
+      const newPolicyForm = document.getElementById("newPolicyForm");
+      const cancelPolicyBtn = document.getElementById("cancelPolicyBtn");
+
+      newPolicyBtn.addEventListener("click", () => {
+        newPolicyForm.style.display = "block";
+      });
+
+      cancelPolicyBtn.addEventListener("click", () => {
+        newPolicyForm.style.display = "none";
+      });
+
+      // Issue new policy
+      const issuePolicyForm = document.getElementById("issuePolicyForm");
+      issuePolicyForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const customer = document.getElementById("policyCustomerInput").value.trim();
+        const policyClass = document.getElementById("policyClassSelect").value;
+        const inception = document.getElementById("policyInceptionDate").value;
+        const expiry = document.getElementById("policyExpiryDate").value;
+        const sumInsured = parseFloat(document.getElementById("policySumInsured").value);
+        const premium = parseFloat(document.getElementById("policyPremium").value);
+
+        const newPolicyNo = `POL-${Date.now().toString(36).slice(2, 8).toUpperCase()}`;
+        const newPolicy = {
+          id: window.data.policies.reduce((max, p) => Math.max(max, p.id), 0) + 100,
+          policyNo: newPolicyNo,
+          class: policyClass,
+          customer: customer,
+          inception: inception,
+          expiry: expiry,
+          status: "Active",
+          sumInsured: sumInsured,
+          premium: premium,
+          branch: 1,
+          endorsements: []
+        };
+
+        window.data.policies.push(newPolicy);
+        issuePolicyForm.reset();
+        newPolicyForm.style.display = "none";
+        renderPoliciesTable();
+      });
+
+      // Policy list table
+      const policiesTableBody = document.querySelector("#policiesTable tbody");
+      function renderPoliciesTable() {
+        policiesTableBody.innerHTML = "";
+
+        window.data.policies.forEach(policy => {
+          const tr = document.createElement("tr");
+
+          tr.innerHTML = [
+            `<td>${policy.policyNo}</td>`,
+            `<td>${policy.customer}</td>`,
+            `<td>${policy.class}</td>`,
+            `<td>${policy.inception}</td>`,
+            `<td>${policy.expiry}</td>`,
+            `<td><span class="status-pill ${getStatusClass(policy.status)}">${policy.status}</span></td>`,
+            `<td>
+              <button class="btn btn-xs btn-primary" data-policy="${policy.id}">View</button>
+              ${(app.currentSession?.role === "Underwriter" || app.currentSession?.role === "BranchManager")
+                ? `<button class="btn btn-xs btn-secondary" data-policy="${policy.id}">Endorse</button>` : ""}
+            </td>`
+          ].join("");
+
+          policiesTableBody.appendChild(tr);
+        });
+
+        // Click handlers (View / Endorse)
+        policiesTableBody.querySelectorAll("button").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            const policyId = e.target.getAttribute("data-policy");
+            const policy = window.data.policies.find(p => p.id === parseInt(policyId));
+            if (!policy) return;
+
+            if (e.target.textContent === "View") {
+              alert(`Viewing policy: ${policy.policyNo} (status: ${policy.status})`);
+            } else if (e.target.textContent === "Endorse") {
+              document.getElementById("endorsementPolicyNo").textContent = policy.policyNo;
+              document.getElementById("endorsementsSection").style.display = "block";
+              window.currentPolicy = policy; // Dummy context for endorsements
+              renderEndorsementsTable();
+            }
+          });
+        });
+      }
+
+      function getStatusClass(status) {
+        switch (status) {
+          case "Active":  return "status-green";
+          case "Lapsed":  return "status-red";
+          case "Draft":   return "status-yellow";
+          case "Cancelled": return "status-gray";
+          default:        return "status-gray";
+        }
+      }
+
+      // Endorsements table
+      const endorsementsTableBody = document.querySelector("#endorsementsTable tbody");
+
+      function renderEndorsementsTable() {
+        if (!window.currentPolicy) {
+          endorsementsTableBody.innerHTML = '<tr><td colspan="4">No policy selected.</td></tr>';
+          return;
+        }
+
+        endorsementsTableBody.innerHTML = "";
+
+        (window.currentPolicy.endorsements || []).forEach(e => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = [
+            `<td>${e.type}</td>`,
+            `<td>${e.description}</td>`,
+            `<td>${e.effectiveDate}</td>`,
+            `<td><button class="btn btn-xs btn-secondary" data-enc="${e.eid}">Delete</button></td>`
+          ].join("");
+          endorsementsTableBody.appendChild(tr);
+        });
+
+        // Simulate delete endorsement
+        endorsementsTableBody.querySelectorAll("button").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            alert("Endorsement deletion is simulated in this prototype.");
+          });
+        });
+      }
+
+      // New endorsement form
+      const newEndorsementBtn = document.getElementById("newEndorsementBtn");
+      const newEndorsementForm = document.getElementById("newEndorsementForm");
+      const cancelEndorsementBtn = document.getElementById("cancelEndorsementBtn");
+      const endorsementForm = document.getElementById("endorsementForm");
+
+      newEndorsementBtn.addEventListener("click", () => {
+        if (!window.currentPolicy) {
+          alert("Please select a policy first.");
+          return;
+        }
+        newEndorsementForm.style.display = "block";
+      });
+
+      cancelEndorsementBtn.addEventListener("click", ()
