@@ -7,11 +7,12 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="portfolio-page">
+
   <header class="suite-header">
     <h1>InsureSuite</h1>
     <div class="user-nav">
       <span id="sessionInfo"></span> •
-      <a href="index.html" id="logoutBtn">Logout</a>
+      <a href="index.html">Logout</a>
     </div>
   </header>
 
@@ -26,6 +27,7 @@
   </nav>
 
   <main class="page-main">
+
     <section class="section-header">
       <h2>Portfolio Transfer Control</h2>
       <button id="newTransferBtn" class="btn btn-primary">New Transfer</button>
@@ -37,14 +39,14 @@
         <div class="form-row">
           <label>Type</label>
           <select id="transferType" required>
-            <option>Policy</option>
-            <option>Claim</option>
-            <option>Customer</option>
+            <option value="Policy">Policy</option>
+            <option value="Claim">Claim</option>
+            <option value="Customer">Customer</option>
           </select>
         </div>
         <div class="form-row">
           <label>Reference</label>
-          <input type="text" id="transferRef" required />
+          <input type="text" id="transferRef" required placeholder="Policy # or Claim #" />
         </div>
         <div class="form-row">
           <label>To</label>
@@ -61,7 +63,7 @@
       </form>
     </div>
 
-    <table class="data-table" id="transferTable">
+    <table id="transferTable" class="data-table">
       <thead>
         <tr>
           <th>Type</th>
@@ -74,9 +76,11 @@
       </thead>
       <tbody></tbody>
     </table>
+
   </main>
 
   <script>
+        // DUMMY DATA FOR PORTFOLIO PAGE
     window.data = {
       branches: [
         { id: 1, name: "Head Office – Blantyre", code: "BO" },
@@ -85,17 +89,26 @@
       ],
       transfers: [
         { id: 1, type: "Policy", ref: "POL-2025-002", from: "Blantyre", to: "Lilongwe", status: "Pending", reason: "Client relocated" },
-        { id: 2, type: "Claim", ref: "CLM-2025-003", from: "Blantyre", to: "Mzuzu", status: "Confirmed", reason: "Claims load balancing" },
-        { id: 3, type: "Policy", ref: "POL-2025-004", from: "Mzuzu", to: "Blantyre", status: "Pending", reason: "Senior underwriter review" }
+        { id: 2, type: "Claim",  ref: "CLM-2025-003", from: "Blantyre", to: "Mzuzu",   status: "Confirmed", reason: "Claims load balancing" },
+        { id: 3, type: "Policy", ref: "POL-2025-004", from: "Mzuzu",    to: "Blantyre", status: "Pending", reason: "Senior underwriter review" }
       ]
     };
 
+    // APP LOGIC
     const app = {
       session: null,
+
+      // Load stored session
       loadSession() {
-        const s = localStorage.getItem("insuresuite-session");
-        if (s) this.session = JSON.parse(s);
+        try {
+          const s = localStorage.getItem("insuresuite-session");
+          if (s) this.session = JSON.parse(s);
+        } catch (e) {
+          // ignore invalid JSON
+        }
       },
+
+      // Require valid session to show page
       requireSession() {
         if (!this.session) {
           window.location = "index.html";
@@ -103,15 +116,21 @@
         }
         return true;
       },
+
+      // Set role + branch in header
       setHeader() {
         const el = document.getElementById("sessionInfo");
         if (!el || !this.session) return;
         const branch = window.data.branches.find(b => b.id === this.session.branchId);
         el.textContent = `${this.session.role} • ${branch ? branch.name : "Unknown Branch"}`;
       },
+
+      // Render transfers table
       renderTransfers() {
         const tbody = document.querySelector("#transferTable tbody");
+        if (!tbody) return;
         tbody.innerHTML = "";
+
         window.data.transfers.forEach(t => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
@@ -127,14 +146,17 @@
           `;
           tbody.appendChild(tr);
         });
-        tbody.querySelectorAll("button").forEach(btn => {
+
+        tbody.querySelectorAll("button[data-action]").forEach(btn => {
           btn.addEventListener("click", () => {
-            const t = window.data.transfers.find(x => x.id === parseInt(btn.dataset.id));
+            const id = parseInt(btn.dataset.id);
+            const t = window.data.transfers.find(x => x.id === id);
             if (!t) return;
+
             if (btn.dataset.action === "confirm") {
               t.status = "Confirmed";
               this.renderTransfers();
-            } else {
+            } else if (btn.dataset.action === "view") {
               alert(`Transfer ${t.type} ${t.ref}
 From: ${t.from}
 To: ${t.to}
@@ -144,27 +166,48 @@ Status: ${t.status}`);
           });
         });
       },
+
+      // Transfer form logic
       initForm() {
-        const wrap = document.getElementById("transferFormWrap");
-        document.getElementById("newTransferBtn").addEventListener("click", () => wrap.style.display = "block");
-        document.getElementById("cancelTransferBtn").addEventListener("click", () => wrap.style.display = "none");
-        document.getElementById("transferForm").addEventListener("submit", (e) => {
+        const wrap  = document.getElementById("transferFormWrap");
+        const form  = document.getElementById("transferForm");
+
+        // Show form
+        document.getElementById("newTransferBtn").addEventListener("click", () => {
+          wrap.style.display = "block";
+        });
+
+        // Hide form
+        document.getElementById("cancelTransferBtn").addEventListener("click", () => {
+          wrap.style.display = "none";
+        });
+
+        // Submit new transfer
+        form.addEventListener("submit", (e) => {
           e.preventDefault();
           const newId = Math.max(...window.data.transfers.map(t => t.id)) + 1;
-          window.data.transfers.unshift({
+          const type   = document.getElementById("transferType").value;
+          const ref    = document.getElementById("transferRef").value.trim();
+          const to     = document.getElementById("transferTo").value.trim();
+          const reason = document.getElementById("transferReason").value.trim();
+
+          window.data.transfers.push({
             id: newId,
-            type: document.getElementById("transferType").value,
-            ref: document.getElementById("transferRef").value.trim(),
+            type,
+            ref,
             from: this.session ? "Current Branch" : "—",
-            to: document.getElementById("transferTo").value.trim(),
+            to,
             status: "Pending",
-            reason: document.getElementById("transferReason").value.trim()
+            reason
           });
-          e.target.reset();
+
+          form.reset();
           wrap.style.display = "none";
           this.renderTransfers();
         });
       },
+
+      // Initialize page
       init() {
         this.loadSession();
         if (!this.requireSession()) return;
@@ -174,102 +217,9 @@ Status: ${t.status}`);
       }
     };
 
+    // Run on page load
     document.addEventListener("DOMContentLoaded", () => app.init());
   </script>
 </body>
-</html>        { id: 2, type: "Claim",  idNo: "CLM-2025-003", from: "Blantyre", to: "Mzuzu",   status: "Confirmed" },
-        { id: 3, type: "Policy", idNo: "POL-2025-004", from: "Mzuzu",    to: "Blantyre", status: "Pending" },
-      ];
-
-      // Toggle new transfer form
-      const newTransferBtn = document.getElementById("newTransferBtn");
-      const newTransferForm = document.getElementById("newTransferForm");
-      const cancelTransferBtn = document.getElementById("cancelTransferBtn");
-
-      newTransferBtn.addEventListener("click", () => {
-        newTransferForm.style.display = "block";
-      });
-
-      cancelTransferBtn.addEventListener("click", () => {
-        newTransferForm.style.display = "none";
-      });
-
-      // Submit transfer (simulated)
-      const transferForm = document.getElementById("transferForm");
-      transferForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const type   = document.getElementById("transferType").value;
-        const idNo   = document.getElementById("transferId").value;
-        const to     = document.getElementById("toBranchUser").value;
-        const reason = document.getElementById("transferReason").value;
-
-        const maxId = Math.max(...window.data.portfolioTransfers.map(t => t.id)) + 10;
-        window.data.portfolioTransfers.push({
-          id: maxId,
-          type: type,
-          idNo: idNo,
-          from: "Simulated Current Branch",
-          to: to,
-          reason: reason,
-          status: "Pending"
-        });
-
-        transferForm.reset();
-        newTransferForm.style.display = "none";
-        renderTransfersTable();
-      });
-
-      // Render transfer history
-      const transfersTable = document.querySelector("#transfersTable tbody");
-      function renderTransfersTable() {
-        transfersTable.innerHTML = "";
-
-        window.data.portfolioTransfers.forEach(t => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = [
-            `<td>${t.type}</td>`,
-            `<td>${t.idNo}</td>`,
-            `<td>${t.from}</td>`,
-            `<td>${t.to}</td>`,
-            `<td><span class="status-pill ${getStatusClass(t.status)}">${t.status}</span></td>`,
-            `<td>
-              ${t.status === "Pending"
-                ? `<button class="btn btn-xs btn-primary" data-enc="${t.id}">Confirm</button>`
-                : `<button class="btn btn-xs btn-secondary" data-enc="${t.id}">View</button>`}
-            </td>`
-          ].join("");
-          transfersTable.appendChild(tr);
-        });
-
-        transfersTable.querySelectorAll("button").forEach(btn => {
-          btn.addEventListener("click", (e) => {
-            const tid = e.target.getAttribute("data-enc");
-            const t = window.data.portfolioTransfers.find(x => x.id === parseInt(tid));
-            if (!t) return;
-
-            if (t.status === "Pending") {
-              if (confirm(`Confirm transfer of ${t.type} ${t.idNo} to ${t.to}?`)) {
-                t.status = "Confirmed";
-                renderTransfersTable();
-              }
-            } else {
-              alert(`Viewing transfer: ${t.type} ${t.idNo} (${t.status})
-Reason: ${t.reason}`);
-            }
-          });
-        });
-      }
-
-      function getStatusClass(status) {
-        switch (status) {
-          case "Pending": return "status-yellow";
-          case "Confirmed": return "status-green";
-          default: return "status-gray";
-        }
-      }
-
-      renderTransfersTable();
-    });
-  </script>
-</body>
 </html>
+    
