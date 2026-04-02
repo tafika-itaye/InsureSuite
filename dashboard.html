@@ -52,6 +52,7 @@
   </main>
 
   <script>
+// DUMMY DATA FOR DASHBOARD
     window.data = {
       claims: [
         { status: "Registered" },
@@ -62,10 +63,10 @@
       ],
       policies: [
         { class: "Motor", status: "Active" },
-        { class: "Fire", status: "Active" },
+        { class: "Fire",  status: "Active" },
         { class: "Motor", status: "Lapsed" },
         { class: "Motor", status: "Active" },
-        { class: "Fire", status: "Active" }
+        { class: "Fire",  status: "Active" }
       ],
       openClaims: 3,
       pendingApprovals: 5,
@@ -74,16 +75,21 @@
       pendingTransfers: 3
     };
 
+    // APP LOGIC
     const app = {
       session: null,
 
+      // Load stored session
       loadSession() {
         try {
           const s = localStorage.getItem("insuresuite-session");
           if (s) this.session = JSON.parse(s);
-        } catch (e) { /* ignore */ }
+        } catch (e) {
+          // ignore invalid JSON
+        }
       },
 
+      // Require valid session to show page
       requireSession() {
         if (!this.session) {
           window.location = "index.html";
@@ -92,12 +98,68 @@
         return true;
       },
 
+      // Set role + branch in header
       setHeader() {
         const el = document.getElementById("sessionInfo");
         if (!el || !this.session) return;
         el.textContent = this.session.role;
       },
 
+      // Load KPI counts
+      loadKpis() {
+        const d = window.data;
+        document.getElementById("kpiOpenClaims").textContent      = d.openClaims;
+        document.getElementById("kpiActivePolicies").textContent  = d.policies.filter(p => p.status === "Active").length;
+        document.getElementById("kpiPendingApprovals").textContent = d.pendingApprovals;
+        document.getElementById("kpiRenewalsDue30").textContent    = d.renewalsDue30Days;
+        document.getElementById("kpiSLABreaches").textContent      = d.slaBreaches;
+        document.getElementById("kpiPendingTransfers").textContent = d.pendingTransfers;
+      },
+
+      // Load charts
+      loadCharts() {
+        // Claims status pie chart
+        const claimCounts = window.data.claims.reduce((acc, c) => {
+          acc[c.status] = (acc[c.status] || 0) + 1;
+          return acc;
+        }, {});
+        new Chart(document.getElementById("claimsChart").getContext("2d"), {
+          type: "pie",
+          data: {
+            labels: Object.keys(claimCounts),
+            datasets: [{ data: Object.values(claimCounts), backgroundColor: ["#003366","#007bff","#28a745","#6c757d"] }]
+          }
+        });
+
+        // Policies by class bar chart
+        const policyCounts = window.data.policies.reduce((acc, p) => {
+          acc[p.class] = (acc[p.class] || 0) + 1;
+          return acc;
+        }, {});
+        new Chart(document.getElementById("policiesChart").getContext("2d"), {
+          type: "bar",
+          data: {
+            labels: Object.keys(policyCounts),
+            datasets: [{ label: "Policies", data: Object.values(policyCounts), backgroundColor: "#003366" }]
+          }
+        });
+      },
+
+      // Initialize page
+      init() {
+        this.loadSession();
+        if (!this.requireSession()) return;
+        this.setHeader();
+        this.loadKpis();
+        this.loadCharts();
+      }
+    };
+
+    // Run on page load
+    document.addEventListener("DOMContentLoaded", () => app.init());
+  </script>
+</body>
+</html>
       loadKpis() {
         const { openClaims, policies, pendingApprovals, renewalsDue30Days, slaBreaches, pendingTransfers } = window.data;
         document.getElementById("kpiOpenClaims").textContent        = openClaims;
