@@ -7,11 +7,12 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="claims-page">
+
   <header class="suite-header">
     <h1>InsureSuite</h1>
     <div class="user-nav">
       <span id="sessionInfo"></span> •
-      <a href="index.html" id="logoutBtn">Logout</a>
+      <a href="index.html">Logout</a>
     </div>
   </header>
 
@@ -26,6 +27,7 @@
   </nav>
 
   <main class="page-main">
+
     <section class="section-header">
       <h2>Claims Management</h2>
       <button id="newClaimBtn" class="btn btn-primary">Register New Claim (FNOL)</button>
@@ -53,7 +55,7 @@
       </form>
     </div>
 
-    <table class="data-table" id="claimsTable">
+    <table id="claimsTable" class="data-table">
       <thead>
         <tr>
           <th>Claim #</th>
@@ -67,29 +69,29 @@
       </thead>
       <tbody></tbody>
     </table>
+
   </main>
 
   <script>
     window.data = {
-      branches: [
-        { id: 1, name: "Head Office – Blantyre", code: "BO" },
-        { id: 2, name: "Lilongwe Branch", code: "LW" },
-        { id: 3, name: "Mzuzu Branch", code: "MZ" }
-      ],
       claims: [
         { id: 201, claimNo: "CLM-2025-001", policyNo: "POL-2025-001", customer: "Nyasa Insurance Agency", lossDate: "2025-03-15", status: "Registered", reserve: "MK 500,000" },
         { id: 202, claimNo: "CLM-2025-002", policyNo: "POL-2025-002", customer: "City Mall Ltd", lossDate: "2025-03-20", status: "Assessing", reserve: "MK 1,200,000" },
-        { id: 203, claimNo: "CLM-2025-003", policyNo: "POL-2025-004", customer: "Rural Transport Co-op", lossDate: "2025-03-25", status: "Approved", reserve: "MK 800,000" },
+        { id: 203, claimNo: "CLM-2025-003", policyNo: "POL-2025-004", customer: "Rural Transport Co‑op", lossDate: "2025-03-25", status: "Approved", reserve: "MK 800,000" },
         { id: 204, claimNo: "CLM-2025-004", policyNo: "POL-2025-005", customer: "GreenGrocers Ltd", lossDate: "2025-03-28", status: "Closed", reserve: "MK 0" }
       ]
     };
 
     const app = {
       session: null,
+
       loadSession() {
-        const s = localStorage.getItem("insuresuite-session");
-        if (s) this.session = JSON.parse(s);
+        try {
+          const s = localStorage.getItem("insuresuite-session");
+          if (s) this.session = JSON.parse(s);
+        } catch (e) { /* ignore */ }
       },
+
       requireSession() {
         if (!this.session) {
           window.location = "index.html";
@@ -97,7 +99,46 @@
         }
         return true;
       },
+
       setHeader() {
+        const el = document.getElementById("sessionInfo");
+        if (!el || !this.session) return;
+        el.textContent = this.session.role;
+      },
+
+      renderClaims() {
+        const tbody = document.querySelector("#claimsTable tbody");
+        if (!tbody) return;
+
+        tbody.innerHTML = "";
+        window.data.claims.forEach(claim => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${claim.claimNo}</td>
+            <td>${claim.policyNo}</td>
+            <td>${claim.customer}</td>
+            <td>${claim.lossDate}</td>
+            <td><span class="status-pill ${claim.status.toLowerCase()}">${claim.status}</span></td>
+            <td>${claim.reserve}</td>
+            <td>
+              <button class="btn btn-xs btn-primary" data-id="${claim.id}" data-action="view">View</button>
+              <button class="btn btn-xs btn-secondary" data-id="${claim.id}" data-action="approve">Approve</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        tbody.querySelectorAll("button[data-action]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = parseInt(btn.dataset.id);
+            const claim = window.data.claims.find(x => x.id === id);
+            if (!claim) return;
+
+            if (btn.dataset.action === "view") {
+              alert(`Claim ${claim.claimNo}
+Policy: ${claim.policyNo}
+Status: ${claim.status}
+Reserve:      setHeader() {
         const el = document.getElementById("sessionInfo");
         if (!el || !this.session) return;
         const branch = window.data.branches.find(b => b.id === this.session.branchId);
