@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>InsureSuite – Portfolio</title>
+  <title>InsureSuite – CRM & Renewals</title>
+  <!-- Link shared style (same as other pages) -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body class="portfolio-page">
+<body class="crm-page">
+
   <header class="suite-header">
     <h1>InsureSuite</h1>
     <div class="user-nav">
       <span id="sessionInfo"></span> •
-      <a href="index.html" id="logoutBtn">Logout</a>
+      <a href="index.html">Logout</a>
     </div>
   </header>
 
@@ -19,85 +21,244 @@
     <a href="dashboard.html" class="menu-item">Dashboard</a>
     <a href="claims.html" class="menu-item">Claims</a>
     <a href="policies.html" class="menu-item">Policies</a>
-    <a href="crm.html" class="menu-item">CRM & Renewals</a>
-    <a href="portfolio.html" class="menu-item active">Portfolio</a>
+    <a href="crm.html" class="menu-item active">CRM & Renewals</a>
+    <a href="portfolio.html" class="menu-item">Portfolio</a>
     <a href="documents.html" class="menu-item">Documents</a>
     <a href="admin.html" class="menu-item">Admin</a>
   </nav>
 
   <main class="page-main">
+
     <section class="section-header">
-      <h2>Portfolio Transfer Control</h2>
-      <button id="newTransferBtn" class="btn btn-primary">New Transfer</button>
+      <h2>CRM & Renewals</h2>
+      <button id="newCustomerBtn" class="btn btn-primary">New Customer</button>
     </section>
 
-    <div id="transferFormWrap" class="form-card" style="display:none;">
-      <h3>Initiate Transfer</h3>
-      <form id="transferForm">
+    <!-- Customer form (hidden by default) -->
+    <div id="customerFormWrap" class="form-card" style="display:none;">
+      <h3>Add Customer</h3>
+      <form id="customerForm">
         <div class="form-row">
-          <label>Type</label>
-          <select id="transferType" required>
-            <option>Policy</option>
-            <option>Claim</option>
-            <option>Customer</option>
-          </select>
+          <label>Name</label>
+          <input type="text" id="custName" required />
         </div>
         <div class="form-row">
-          <label>Reference</label>
-          <input type="text" id="transferRef" required />
+          <label>National ID</label>
+          <input type="text" id="custNid" />
         </div>
         <div class="form-row">
-          <label>To</label>
-          <input type="text" id="transferTo" required placeholder="Target branch or user" />
+          <label>Phone</label>
+          <input type="tel" id="custPhone" />
         </div>
         <div class="form-row">
-          <label>Reason</label>
-          <textarea id="transferReason" rows="3" required></textarea>
+          <label>Email</label>
+          <input type="email" id="custEmail" />
         </div>
         <div class="form-row">
-          <button type="submit" class="btn btn-primary">Save Transfer</button>
-          <button type="button" id="cancelTransferBtn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Customer</button>
+          <button type="button" id="cancelCustomerBtn" class="btn btn-secondary">Cancel</button>
         </div>
       </form>
     </div>
 
-    <table class="data-table" id="transferTable">
+    <!-- Customers table -->
+    <table class="data-table" id="customersTable">
       <thead>
         <tr>
-          <th>Type</th>
-          <th>Reference</th>
-          <th>From</th>
-          <th>To</th>
+          <th>Customer</th>
+          <th>Contact</th>
+          <th>Last Policy</th>
           <th>Status</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
+
+    <!-- Renewals pipeline -->
+    <section style="margin-top:2rem;">
+      <h3>Renewals Pipeline (Next 30 Days)</h3>
+      <table class="data-table" id="renewalsTable">
+        <thead>
+          <tr>
+            <th>Policy #</th>
+            <th>Customer</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
   </main>
 
   <script>
+    // === DUMMY DATA (for demo only) ===
     window.data = {
       branches: [
         { id: 1, name: "Head Office – Blantyre", code: "BO" },
         { id: 2, name: "Lilongwe Branch", code: "LW" },
         { id: 3, name: "Mzuzu Branch", code: "MZ" }
       ],
-      transfers: [
-        { id: 1, type: "Policy", ref: "POL-2025-002", from: "Blantyre", to: "Lilongwe", status: "Pending", reason: "Client relocated" },
-        { id: 2, type: "Claim", ref: "CLM-2025-003", from: "Blantyre", to: "Mzuzu", status: "Confirmed", reason: "Claims load balancing" },
-        { id: 3, type: "Policy", ref: "POL-2025-004", from: "Mzuzu", to: "Blantyre", status: "Pending", reason: "Senior underwriter review" }
+      customers: [
+        { id: 1, name: "Nyasa Insurance Agency", nid: "NIA-001", phone: "+265 111 111 111", email: "info@nyasa.co.mw", lastPolicy: "POL-2025-001", status: "Active" },
+        { id: 2, name: "City Mall Ltd",         nid: "CML-002", phone: "+265 222 222 222", email: "accounts@citymall.co.mw", lastPolicy: "POL-2025-002", status: "Active" },
+        { id: 3, name: "AutoPlus Ltd",          nid: "APL-003", phone: "+265 333 333 333", email: "ops@autoplus.co.mw", lastPolicy: "POL-2025-003", status: "Lapsed" },
+        { id: 4, name: "Rural Transport Co-op", nid: "RTC-004", phone: "+265 444 444 444", email: "chair@rtc.coop", lastPolicy: "POL-2025-004", status: "Active" },
+        { id: 5, name: "GreenGrocers Ltd",      nid: "GGL-005", phone: "+265 555 555 555", email: "sales@greengrocers.mw", lastPolicy: "POL-2025-005", status: "Active" }
+      ],
+      renewals: [
+        { id: 1, policyNo: "POL-2025-001", customer: "Nyasa Insurance Agency", dueDate: "2025-04-05", status: "Pending" },
+        { id: 2, policyNo: "POL-2025-002", customer: "City Mall Ltd",          dueDate: "2025-04-08", status: "ContactedPhone" },
+        { id: 3, policyNo: "POL-2025-004", customer: "Rural Transport Co‑op", dueDate: "2025-04-12", status: "ContactedEmail" },
+        { id: 4, policyNo: "POL-2025-005", customer: "GreenGrocers Ltd",      dueDate: "2025-04-15", status: "OfferSent" }
       ]
     };
 
+    // === APP LOGIC (minimal) ===
     const app = {
       session: null,
+
       loadSession() {
-        const s = localStorage.getItem("insuresuite-session");
-        if (s) this.session = JSON.parse(s);
+        try {
+          const s = localStorage.getItem("insuresuite-session");
+          if (s) this.session = JSON.parse(s);
+        } catch (e) {
+          console.warn("Invalid session JSON.");
+        }
       },
+
       requireSession() {
         if (!this.session) {
+          window.location = "index.html";  // this is the LINE that stops it loading
+          return false;
+        }
+        return true;
+      },
+
+      setHeader() {
+        const el = document.getElementById("sessionInfo");
+        if (!el || !this.session) return;
+        const branch = window.data.branches.find(b => b.id === this.session.branchId);
+        el.textContent = `${this.session.role} • ${branch ? branch.name : "Unknown Branch"}`;
+      },
+
+      renderCustomers() {
+        const tbody = document.querySelector("#customersTable tbody");
+        if (!tbody) return;
+
+        tbody.innerHTML = "";
+        window.data.customers.forEach(c => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${c.name}</td>
+            <td>${c.phone}<br>${c.email}</td>
+            <td>${c.lastPolicy}</td>
+            <td><span class="status-pill ${c.status.toLowerCase()}">${c.status}</span></td>
+            <td>
+              <button class="btn btn-xs btn-primary" data-id="${c.id}">View</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        tbody.querySelectorAll("button[data-id]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = parseInt(btn.dataset.id);
+            const c = window.data.customers.find(x => x.id === id);
+            if (!c) return;
+            alert(`Customer: ${c.name}
+Contact: ${c.phone}
+Email: ${c.email}
+Last Policy: ${c.lastPolicy}`);
+          });
+        });
+      },
+
+      renderRenewals() {
+        const tbody = document.querySelector("#renewalsTable tbody");
+        if (!tbody) return;
+
+        tbody.innerHTML = "";
+        window.data.renewals.forEach(r => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${r.policyNo}</td>
+            <td>${r.customer}</td>
+            <td>${r.dueDate}</td>
+            <td><span class="status-pill ${r.status.toLowerCase()}">${r.status}</span></td>
+            <td>
+              <button class="btn btn-xs btn-primary" data-id="${r.id}">Follow Up</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        tbody.querySelectorAll("button[data-id]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = parseInt(btn.dataset.id);
+            const r = window.data.renewals.find(x => x.id === id);
+            if (!r) return;
+            alert(`Follow up: ${r.policyNo} (${r.customer})`);
+          });
+        });
+      },
+
+      initForm() {
+        const wrap = document.getElementById("customerFormWrap");
+        if (!wrap) return;
+
+        document.getElementById("newCustomerBtn").addEventListener("click", () => {
+          wrap.style.display = "block";
+        });
+
+        document.getElementById("cancelCustomerBtn").addEventListener("click", () => {
+          wrap.style.display = "none";
+        });
+
+        document.getElementById("customerForm").addEventListener("submit", (e) => {
+          e.preventDefault();
+          const newId = window.data.customers.reduce((m, c) => Math.max(m, c.id), 0) + 1;
+          const name  = document.getElementById("custName").value.trim();
+          const nid   = document.getElementById("custNid").value.trim();
+          const phone = document.getElementById("custPhone").value.trim();
+          const email = document.getElementById("custEmail").value.trim();
+
+          window.data.customers.push({
+            id: newId,
+            name,
+            nid,
+            phone,
+            email,
+            lastPolicy: "—",
+            status: "Active"
+          });
+
+          e.target.reset();
+          wrap.style.display = "none";
+          this.renderCustomers();
+        });
+      },
+
+      init() {
+        this.loadSession();
+        if (!this.requireSession()) return;  // if this fails, CRM never starts
+        this.setHeader();
+        this.renderCustomers();
+        this.renderRenewals();
+        this.initForm();
+      }
+    };
+
+    // === Run only once DOM is ready ===
+    document.addEventListener("DOMContentLoaded", () => {
+      app.init();
+    });
+  </script>
+</body>
+</html>        if (!this.session) {
           window.location = "index.html";
           return false;
         }
