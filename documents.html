@@ -7,11 +7,12 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="documents-page">
+
   <header class="suite-header">
     <h1>InsureSuite</h1>
     <div class="user-nav">
       <span id="sessionInfo"></span> •
-      <a href="index.html" id="logoutBtn">Logout</a>
+      <a href="index.html">Logout</a>
     </div>
   </header>
 
@@ -26,6 +27,7 @@
   </nav>
 
   <main class="page-main">
+
     <section class="section-header">
       <h2>Document & Records Management</h2>
       <button id="newDocBtn" class="btn btn-primary">Upload Document</button>
@@ -41,10 +43,10 @@
         <div class="form-row">
           <label>Category</label>
           <select id="docCategory" required>
-            <option>Policy</option>
-            <option>Claim</option>
-            <option>Customer</option>
-            <option>General</option>
+            <option value="Policy">Policy</option>
+            <option value="Claim">Claim</option>
+            <option value="Customer">Customer</option>
+            <option value="General">General</option>
           </select>
         </div>
         <div class="form-row">
@@ -52,7 +54,7 @@
           <input type="text" id="docRef" placeholder="POL-2025-001 / CLM-2025-002" />
         </div>
         <div class="form-row">
-          <label>File</label>
+          <label>File (Simulated)</label>
           <input type="file" id="docFile" />
         </div>
         <div class="form-row">
@@ -62,7 +64,7 @@
       </form>
     </div>
 
-    <table class="data-table" id="documentsTable">
+    <table id="documentsTable" class="data-table">
       <thead>
         <tr>
           <th>Document</th>
@@ -74,9 +76,11 @@
       </thead>
       <tbody></tbody>
     </table>
+
   </main>
 
   <script>
+        // DUMMY DATA FOR DOCUMENTS PAGE
     window.data = {
       branches: [
         { id: 1, name: "Head Office – Blantyre", code: "BO" },
@@ -85,18 +89,27 @@
       ],
       documents: [
         { id: 1, title: "Policy Schedule POL-2025-001", category: "Policy", ref: "POL-2025-001", uploadedBy: "Underwriter" },
-        { id: 2, title: "Claim Photos CLM-2025-002", category: "Claim", ref: "CLM-2025-002", uploadedBy: "Claims Handler" },
-        { id: 3, title: "Customer KYC Form", category: "Customer", ref: "CUST-001", uploadedBy: "Front Desk" },
+        { id: 2, title: "Claim Photos CLM-2025-002",      category: "Claim",  ref: "CLM-2025-002", uploadedBy: "Claims Handler" },
+        { id: 3, title: "Customer KYC Form",             category: "Customer", ref: "CUST-001", uploadedBy: "Front Desk" },
         { id: 4, title: "Renewal Quotation POL-2025-004", category: "Policy", ref: "POL-2025-004", uploadedBy: "Underwriter" }
       ]
     };
 
+    // APP LOGIC
     const app = {
       session: null,
+
+      // Load stored session
       loadSession() {
-        const s = localStorage.getItem("insuresuite-session");
-        if (s) this.session = JSON.parse(s);
+        try {
+          const s = localStorage.getItem("insuresuite-session");
+          if (s) this.session = JSON.parse(s);
+        } catch (e) {
+          // ignore invalid JSON
+        }
       },
+
+      // Require valid session to show page
       requireSession() {
         if (!this.session) {
           window.location = "index.html";
@@ -104,15 +117,21 @@
         }
         return true;
       },
+
+      // Set role + branch in header
       setHeader() {
         const el = document.getElementById("sessionInfo");
         if (!el || !this.session) return;
         const branch = window.data.branches.find(b => b.id === this.session.branchId);
         el.textContent = `${this.session.role} • ${branch ? branch.name : "Unknown Branch"}`;
       },
+
+      // Render documents table
       renderDocs() {
         const tbody = document.querySelector("#documentsTable tbody");
+        if (!tbody) return;
         tbody.innerHTML = "";
+
         window.data.documents.forEach(doc => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
@@ -127,15 +146,19 @@
           `;
           tbody.appendChild(tr);
         });
-        tbody.querySelectorAll("button").forEach(btn => {
+
+        tbody.querySelectorAll("button[data-action]").forEach(btn => {
           btn.addEventListener("click", () => {
-            const doc = window.data.documents.find(x => x.id === parseInt(btn.dataset.id));
+            const id = parseInt(btn.dataset.id);
+            const doc = window.data.documents.find(x => x.id === id);
             if (!doc) return;
+
             if (btn.dataset.action === "view") {
               alert(`Document: ${doc.title}
 Category: ${doc.category}
-Reference: ${doc.ref}`);
-            } else {
+Reference: ${doc.ref}
+Uploaded By: ${doc.uploadedBy}`);
+            } else if (btn.dataset.action === "delete") {
               if (confirm(`Delete "${doc.title}"?`)) {
                 window.data.documents = window.data.documents.filter(x => x.id !== doc.id);
                 this.renderDocs();
@@ -144,25 +167,46 @@ Reference: ${doc.ref}`);
           });
         });
       },
+
+      // Document upload form logic
       initForm() {
-        const wrap = document.getElementById("docFormWrap");
-        document.getElementById("newDocBtn").addEventListener("click", () => wrap.style.display = "block");
-        document.getElementById("cancelDocBtn").addEventListener("click", () => wrap.style.display = "none");
-        document.getElementById("docForm").addEventListener("submit", (e) => {
+        const wrap  = document.getElementById("docFormWrap");
+        const form  = document.getElementById("docForm");
+
+        // Show form
+        document.getElementById("newDocBtn").addEventListener("click", () => {
+          wrap.style.display = "block";
+        });
+
+        // Hide form
+        document.getElementById("cancelDocBtn").addEventListener("click", () => {
+          wrap.style.display = "none";
+        });
+
+        // Submit new document
+        form.addEventListener("submit", (e) => {
           e.preventDefault();
           const newId = Math.max(...window.data.documents.map(d => d.id)) + 1;
-          window.data.documents.unshift({
+          const title    = document.getElementById("docTitle").value.trim();
+          const category = document.getElementById("docCategory").value;
+          const ref      = document.getElementById("docRef").value.trim();
+          const uploadedBy = this.session ? this.session.role : "Demo User";
+
+          window.data.documents.push({
             id: newId,
-            title: document.getElementById("docTitle").value.trim(),
-            category: document.getElementById("docCategory").value,
-            ref: document.getElementById("docRef").value.trim() || "—",
-            uploadedBy: this.session ? this.session.role : "Demo User"
+            title,
+            category,
+            ref: ref || "—",
+            uploadedBy
           });
-          e.target.reset();
+
+          form.reset();
           wrap.style.display = "none";
           this.renderDocs();
         });
       },
+
+      // Initialize page
       init() {
         this.loadSession();
         if (!this.requireSession()) return;
@@ -172,92 +216,9 @@ Reference: ${doc.ref}`);
       }
     };
 
+    // Run on page load
     document.addEventListener("DOMContentLoaded", () => app.init());
   </script>
 </body>
-</html>        { id: 2, title: "Claim Scene Photos CLM-2025-002", category: "Claim", entityId: "202", branch: 1, uploadedBy: "Claims Handler 1" },
-        { id: 3, title: "Renewal Quotation POL-2025-004", category: "Policy", entityId: "104", branch: 3, uploadedBy: "Underwriter 2" },
-        { id: 4, title: "Customer Consent Form", category: "Customer", entityId: "C001", branch: 2, uploadedBy: "Front Desk 1" },
-        { id: 5, title: "Watermarking Policy PDF", category: "General", entityId: "GEN-001", branch: 1, uploadedBy: "Compliance Officer" },
-      ];
-
-      // Toggle upload form
-      const newDocBtn = document.getElementById("newDocBtn");
-      const uploadForm = document.getElementById("uploadForm");
-      const cancelDocBtn = document.getElementById("cancelDocBtn");
-
-      newDocBtn.addEventListener("click", () => {
-        uploadForm.style.display = "block";
-      });
-
-      cancelDocBtn.addEventListener("click", () => {
-        uploadForm.style.display = "none";
-      });
-
-      // Upload document (simulated)
-      const documentForm = document.getElementById("documentForm");
-      documentForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        const title      = document.getElementById("docTitle").value.trim();
-        const category   = document.getElementById("docCategory").value;
-        const entityId   = document.getElementById("docEntityId").value.trim();
-
-        const maxId = Math.max(...window.data.documents.map(d => d.id)) + 10;
-        window.data.documents.push({
-          id: maxId,
-          title: title,
-          category: category,
-          entityId: entityId,
-          branch: app.currentSession?.branchId || 1,
-          uploadedBy: `Simulated ${app.currentSession?.role} (${app.currentSession?.userId})`
-        });
-
-        documentForm.reset();
-        uploadForm.style.display = "none";
-        renderDocumentsTable();
-      });
-
-      // Render documents table
-      const docsTable = document.querySelector("#documentsTable tbody");
-      function renderDocumentsTable() {
-        docsTable.innerHTML = "";
-
-        window.data.documents.forEach(doc => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = [
-            `<td class="nowrap">${doc.title}</td>`,
-            `<td class="nowrap">${doc.category}</td>`,
-            `<td class="nowrap">${doc.entityId}</td>`,
-            `<td class="nowrap">${doc.uploadedBy}</td>`,
-            `<td>
-              <button class="btn btn-xs btn-primary" data-doc="${doc.id}">View</button>
-              <button class="btn btn-xs btn-secondary" data-doc="${doc.id}">Delete</button>
-            </td>`
-          ].join("");
-          docsTable.appendChild(tr);
-        });
-
-        docsTable.querySelectorAll("button").forEach(btn => {
-          btn.addEventListener("click", (e) => {
-            const docId = e.target.getAttribute("data-doc");
-            const doc = window.data.documents.find(d => d.id === parseInt(docId));
-            if (!doc) return;
-
-            if (e.target.textContent === "View") {
-              alert(`Viewing document: ${doc.title} (type: ${doc.category})`);
-            } else if (e.target.textContent === "Delete") {
-              if (confirm(`Delete document "${doc.title}"?`)) {
-                window.data.documents = window.data.documents.filter(d => d.id !== doc.id);
-                renderDocumentsTable();
-              }
-            }
-          });
-        });
-      }
-
-      renderDocumentsTable();
-    });
-  </script>
-</body>
 </html>
+    
