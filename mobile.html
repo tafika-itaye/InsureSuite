@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InsureSuite – Splash</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #003366;
+      color: #fff;
+    }
+
+    /* Splash overlay */
+    .splash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .splash-logo {
+      font-size: 2.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .splash-tag {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      text-align: center;
+    }
+
+    .splash-btn {
+      margin-top: 1.2rem;
+      padding: 0.6rem 1.4rem;
+      font-size: 0.95rem;
+      border: 2px solid #fff;
+      border-radius: 0.3rem;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .splash-btn:hover {
+      background: rgba(255,255,255,0.15);
+    }
+
+    .splash-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* Main content (hidden until splash goes away) */
+    .app-content {
+      display: none;
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Splash Screen -->
+  <div id="splashScreen" class="splash">
+    <div class="splash-logo">
+      InsureSuite
+    </div>
+    <div class="splash-tag">
+      Mid‑Tier Insurance Operations Suite
+    </div>
+    <button id="splashContinueBtn" class="splash-btn">
+      Continue
+    </button>
+  </div>
+
+  <!-- Main app content (after splash) -->
+  <div id="mainContent" class="app-content">
+    <h1>InsureSuite</h1>
+    <p>Your insurance operations dashboard will appear here.</p>
+    <p>For demo, open this page on mobile to see the splash screen.</p>
+  </div>
+
+  <script>
+    // Get elements
+    const splash  = document.getElementById("splashScreen");
+    const content = document.getElementById("mainContent");
+    const btn     = document.getElementById("splashContinueBtn");
+
+    // Auto‑hide splash after 3 seconds (optional)
+    setTimeout(() => {
+      splash.style.display = "none";
+      content.style.display = "block";
+    }, 3000);
+
+    // Allow user to tap early
+    btn.addEventListener("click", () => {
+      splash.style.display = "none";
+      content.style.display = "block";
+    });
+  </script>
+</body>
+</html>
