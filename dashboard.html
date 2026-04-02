@@ -8,11 +8,12 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="dashboard-page">
+
   <header class="suite-header">
     <h1>InsureSuite</h1>
     <div class="user-nav">
       <span id="sessionInfo"></span> •
-      <a href="index.html" id="logoutBtn">Logout</a>
+      <a href="index.html">Logout</a>
     </div>
   </header>
 
@@ -27,6 +28,7 @@
   </nav>
 
   <main class="page-main">
+
     <div class="kpi-grid">
       <div class="kpi-card orange"><h3>Open Claims</h3><div class="kpi-value" id="kpiOpenClaims">-</div></div>
       <div class="kpi-card green"><h3>Active Policies</h3><div class="kpi-value" id="kpiActivePolicies">-</div></div>
@@ -46,15 +48,11 @@
         <canvas id="policiesChart"></canvas>
       </div>
     </div>
+
   </main>
 
   <script>
     window.data = {
-      branches: [
-        { id: 1, name: "Head Office – Blantyre", code: "BO" },
-        { id: 2, name: "Lilongwe Branch", code: "LW" },
-        { id: 3, name: "Mzuzu Branch", code: "MZ" }
-      ],
       claims: [
         { status: "Registered" },
         { status: "Assessing" },
@@ -78,10 +76,14 @@
 
     const app = {
       session: null,
+
       loadSession() {
-        const s = localStorage.getItem("insuresuite-session");
-        if (s) this.session = JSON.parse(s);
+        try {
+          const s = localStorage.getItem("insuresuite-session");
+          if (s) this.session = JSON.parse(s);
+        } catch (e) { /* ignore */ }
       },
+
       requireSession() {
         if (!this.session) {
           window.location = "index.html";
@@ -89,15 +91,62 @@
         }
         return true;
       },
+
       setHeader() {
         const el = document.getElementById("sessionInfo");
         if (!el || !this.session) return;
-        const branch = window.data.branches.find(b => b.id === this.session.branchId);
-        el.textContent = `${this.session.role} • ${branch ? branch.name : "Unknown Branch"}`;
+        el.textContent = this.session.role;
       },
+
       loadKpis() {
-        document.getElementById("kpiOpenClaims").textContent = window.data.openClaims;
-        document.getElementById("kpiActivePolicies").textContent = window.data.policies.filter(p => p.status === "Active").length;
+        const { openClaims, policies, pendingApprovals, renewalsDue30Days, slaBreaches, pendingTransfers } = window.data;
+        document.getElementById("kpiOpenClaims").textContent        = openClaims;
+        document.getElementById("kpiActivePolicies").textContent    = policies.filter(p => p.status === "Active").length;
+        document.getElementById("kpiPendingApprovals").textContent  = pendingApprovals;
+        document.getElementById("kpiRenewalsDue30").textContent     = renewalsDue30Days;
+        document.getElementById("kpiSLABreaches").textContent       = slaBreaches;
+        document.getElementById("kpiPendingTransfers").textContent  = pendingTransfers;
+      },
+
+      loadCharts() {
+        const claimCounts = window.data.claims.reduce((acc, c) => {
+          acc[c.status] = (acc[c.status] || 0) + 1;
+          return acc;
+        }, {});
+        new Chart(document.getElementById("claimsChart").getContext("2d"), {
+          type: "pie",
+          data: {
+            labels: Object.keys(claimCounts),
+            datasets: [{ data: Object.values(claimCounts), backgroundColor: ["#003366","#007bff","#28a745","#6c757d"] }]
+          }
+        });
+
+        const policyCounts = window.data.policies.reduce((acc, p) => {
+          acc[p.class] = (acc[p.class] || 0) + 1;
+          return acc;
+        }, {});
+        new Chart(document.getElementById("policiesChart").getContext("2d"), {
+          type: "bar",
+          data: {
+            labels: Object.keys(policyCounts),
+            datasets: [{ label: "Policies", data: Object.values(policyCounts), backgroundColor: "#003366" }]
+          }
+        });
+      },
+
+      init() {
+        this.loadSession();
+        if (!this.requireSession()) return;
+        this.setHeader();
+        this.loadKpis();
+        this.loadCharts();
+      }
+    };
+
+    document.addEventListener("DOMContentLoaded", () => app.init());
+  </script>
+</body>
+</html>        document.getElementById("kpiActivePolicies").textContent = window.data.policies.filter(p => p.status === "Active").length;
         document.getElementById("kpiPendingApprovals").textContent = window.data.pendingApprovals;
         document.getElementById("kpiRenewalsDue30").textContent = window.data.renewalsDue30Days;
         document.getElementById("kpiSLABreaches").textContent = window.data.slaBreaches;
