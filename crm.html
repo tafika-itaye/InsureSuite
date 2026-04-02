@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InsureSuite – CRM & Renewals</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="crm-page">
+  <header class="suite-header">
+    <h1>InsureSuite</h1>
+    <div class="user-nav">
+      <span id="currentRole"></span> •
+      <a href="index.html" id="logoutBtn">Logout</a>
+    </div>
+  </header>
+
+  <nav class="main-menu">
+    <a href="dashboard.html" class="menu-item">Dashboard</a>
+    <a href="claims.html" class="menu-item">Claims</a>
+    <a href="policies.html" class="menu-item">Policies</a>
+    <a href="crm.html" class="menu-item active">CRM & Renewals</a>
+    <a href="portfolio.html" class="menu-item">Portfolio</a>
+    <a href="documents.html" class="menu-item">Documents</a>
+    <a href="admin.html" class="menu-item">Admin</a>
+  </nav>
+
+  <main class="crm-main">
+    <section class="section-header">
+      <h2>CRM & Renewals</h2>
+      <button id="newCustomerBtn" class="btn btn-primary">New Customer</button>
+    </section>
+
+    <div id="newCustomerForm" class="form-card" style="display:none;">
+      <h3>Add New Customer</h3>
+      <form id="customerForm">
+        <div class="form-row">
+          <label>Name</label>
+          <input type="text" id="customerName" required />
+        </div>
+        <div class="form-row">
+          <label>National ID</label>
+          <input type="text" id="customerId" />
+        </div>
+        <div class="form-row">
+          <label>Phone</label>
+          <input type="text" id="customerPhone" />
+        </div>
+        <div class="form-row">
+          <label>Email</label>
+          <input type="email" id="customerEmail" />
+        </div>
+        <div class="form-row">
+          <button type="submit" class="btn btn-primary">Save Customer</button>
+          <button type="button" id="cancelCustomerBtn" class="btn btn-secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <table id="customersTable" class="data-table">
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>ID / Phone</th>
+          <th>Last Policy</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <!-- Renewals pipeline -->
+    <section id="renewalsSection" class="section-header" style="margin-top:2rem;">
+      <h2>Renewals Pipeline (Next 30 Days)</h2>
+
+      <table id="renewalsTable" class="data-table">
+        <thead>
+          <tr>
+            <th>Policy #</th>
+            <th>Customer</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!app.hasSession()) {
+        window.location = "index.html";
+        return;
+      }
+
+      app.updateMainMenu();
+
+      const currentRole = document.getElementById("currentRole");
+      if (currentRole && app.currentSession) {
+        currentRole.textContent = app.currentSession.role;
+      }
+
+      // Dummy renewals data (for demo)
+      window.data.renewals = [
+        { id: 1, policyId: 101, policyNo: "POL-2025-001", customer: "Nyasa Insurance Agency", due: "2025-04-05", status: "Pending" },
+        { id: 2, policyId: 102, policyNo: "POL-2025-002", customer: "City Mall Ltd",          due: "2025-04-08", status: "ContactedPhone" },
+        { id: 3, policyId: 104, policyNo: "POL-2025-004", customer: "Rural Transport Co‑op", due: "2025-04-12", status: "ContactedEmail" },
+        { id: 4, policyId: 105, policyNo: "POL-2025-005", customer: "GreenGrocers Ltd",      due: "2025-04-15", status: "OfferSent" },
+      ];
+
+      // Toggle new customer form
+      const newCustomerBtn = document.getElementById("newCustomerBtn");
+      const newCustomerForm = document.getElementById("newCustomerForm");
+      const cancelCustomerBtn = document.getElementById("cancelCustomerBtn");
+
+      newCustomerBtn.addEventListener("click", () => {
+        newCustomerForm.style.display = "block";
+      });
+
+      cancelCustomerBtn.addEventListener("click", () => {
+        newCustomerForm.style.display = "none";
+      });
+
+      // Add new customer (dummy)
+      const customerForm = document.getElementById("customerForm");
+      customerForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name  = document.getElementById("customerName").value.trim();
+        const id    = document.getElementById("customerId").value.trim();
+        const phone = document.getElementById("customerPhone").value.trim();
+        const email = document.getElementById("customerEmail").value.trim();
+
+        // For demo, just add to policies (pretend customer reached via policy)
+        const maxId = window.data.policies.reduce((m, p) => Math.max(m, p.id), 0) + 100;
+        window.data.policies.push({
+          id: maxId,
+          policyNo: `POL-2025-${maxId}`,
+          class: "Motor",
+          customer: name,
+          inception: "2025-04-01",
+          expiry: "2026-04-01",
+          status: "Active",
+          sumInsured: 1500000,
+          premium: 120000,
+          branch: 1
+        });
+
+        customerForm.reset();
+        newCustomerForm.style.display = "none";
+        renderCustomersTable();
+        renderRenewalsTable();
+      });
+
+      // Render customers (by policy customer)
+      const customersTable = document.querySelector("#customersTable tbody");
+      function renderCustomersTable() {
+        customersTable.innerHTML = "";
+
+        const customers = window.data.policies
+          .filter(p => p.customer && p.customer.length > 0)
+          .map(p => p.customer)
+          .filter((v, i, a) => a.indexOf(v) === i);
+
+        customers.forEach(cust => {
+          const lastPolicy = window.data.policies.find(p => p.customer === cust);
+          const tr = document.createElement("tr");
+          tr.innerHTML = [
+            `<td class="nowrap">${cust}</td>`,
+            `<td>${lastPolicy?.id || "–"}</td>`,
+            `<td class="nowrap">${lastPolicy?.policyNo || "–"}</td>`,
+            `<td><span class="status-pill status-blue">${lastPolicy?.status || "Unknown"}</span></td>`,
+            `<td>
+              <button class="btn btn-xs btn-primary" data-cust="${cust}">View</button>
+            </td>`
+          ].join("");
+          customersTable.appendChild(tr);
+        });
+
+        customersTable.querySelectorAll("button").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            const cust = e.target.getAttribute("data-cust");
+            const policies = window.data.policies.filter(p => p.customer === cust);
+            const list = policies.map(p => `${p.policyNo} (${p.class})`).join(", ");
+            alert(`Customer: ${cust}
+Policies: ${list || "None"}`);
+          });
+        });
+      }
+
+      // Render renewals pipeline
+      const renewalsTable = document.querySelector("#renewalsTable tbody");
+      function renderRenewalsTable() {
+        renewalsTable.innerHTML = "";
+
+        window.data.renewals.forEach(r => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = [
+            `<td>${r.policyNo}</td>`,
+            `<td>${r.customer}</td>`,
+            `<td>${r.due}</td>`,
+            `<td><span class="status-pill ${r.status === "OfferSent" ? "status-green" : "status-yellow"}">${r.status}</span></td>`,
+            `<td>
+              <button class="btn btn-xs btn-primary" data-renewal="${r.id}">Follow Up</button>
+            </td>`
+          ].join("");
+          renewalsTable.appendChild(tr);
+        });
+
+        renewalsTable.querySelectorAll("button").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            const rid = e.target.getAttribute("data-renewal");
+            const r = window.data.renewals.find(x => x.id === parseInt(rid));
+            alert(`Following up renewal: ${r?.policyNo} for ${r?.customer}`);
+          });
+        });
+      }
+
+      renderCustomersTable();
+      renderRenewalsTable();
+    });
+  </script>
+</body>
+  </html>
