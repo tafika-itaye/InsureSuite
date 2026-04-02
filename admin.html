@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InsureSuite – Admin | TechNexus Malawi</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="admin-page">
+
+  <header class="suite-header">
+    <h1>InsureSuite</h1>
+    <div class="user-nav">
+      <span id="currentRole"></span> •
+      <a href="index.html">Logout</a>
+    </div>
+  </header>
+
+  <nav class="main-menu">
+    <a href="dashboard.html" class="menu-item">Dashboard</a>
+    <a href="claims.html" class="menu-item">Claims</a>
+    <a href="policies.html" class="menu-item">Policies</a>
+    <a href="crm.html" class="menu-item">CRM & Renewals</a>
+    <a href="portfolio.html" class="menu-item">Portfolio</a>
+    <a href="documents.html" class="menu-item">Documents</a>
+    <a href="admin.html" class="menu-item active">Admin</a>
+  </nav>
+
+  <main class="admin-main">
+    <section class="section-header">
+      <h2>Admin – User & Audit Management</h2>
+      <button id="newUserBtn" class="btn btn-primary">New User</button>
+    </section>
+
+    <div id="newUserForm" class="form-card" style="display:none;">
+      <h3>Add New User</h3>
+      <form id="userForm">
+        <div class="form-row">
+          <label>Name</label>
+          <input type="text" id="userName" required />
+        </div>
+        <div class="form-row">
+          <label>Username</label>
+          <input type="text" id="userUsername" required />
+        </div>
+        <div class="form-row">
+          <label>Role</label>
+          <select id="userRole" required>
+            <option value="BranchManager">Branch Manager</option>
+            <option value="Underwriter">Underwriter</option>
+            <option value="ClaimsHandler">Claims Handler</option>
+            <option value="FrontDesk">Front Desk</option>
+            <option value="ReadOnly">Read‑Only</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Branch</label>
+          <select id="userBranch" required>
+            <option value="1">Head Office – Blantyre</option>
+            <option value="2">Lilongwe Branch</option>
+            <option value="3">Mzuzu Branch</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <button type="submit" class="btn btn-primary">Create User</button>
+          <button type="button" id="cancelUserBtn" class="btn btn-secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <table id="usersTable" class="data-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Branch</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <!-- Audit log section -->
+    <section id="auditSection" style="margin-top:2rem;">
+      <h2>Audit Log (Demo‑Only)</h2>
+
+      <table id="auditTable" class="data-table">
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Action</th>
+            <th>Entity</th>
+            <th>User</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- Dummy data for admin page -->
+  <script>
+    // DUMMY DATA – for demo only
+    window.data = {
+      branches: [
+        { id: 1, name: "Head Office – Blantyre", code: "BO" },
+        { id: 2, name: "Lilongwe Branch",        code: "LW" },
+        { id: 3, name: "Mzuzu Branch",           code: "MZ" },
+      ],
+
+      users: [
+        { id: 1, name: "Chris Kanyuka Jr",      username: "chriskanyuka", role: "SuperAdmin",  branch: 1, isActive: true },
+        { id: 2, name: "Jane Moyo",             username: "janemoyo",     role: "BranchManager", branch: 2, isActive: true },
+        { id: 3, name: "Tom Chilima",           username: "tomchilima",   role: "Underwriter",  branch: 1, isActive: true },
+        { id: 4, name: "Grace Banda",           username: "gracebanda",   role: "ClaimsHandler", branch: 1, isActive: true },
+        { id: 5, name: "Paul Mwale",            username: "paulmwale",    role: "FrontDesk",    branch: 3, isActive: true },
+        { id: 6, name: "Linda Phiri",           username: "lindaphiri",   role: "ReadOnly",     branch: 2, isActive: true },
+      ],
+
+      auditLog: [
+        { module: "Claims",     action: "Register",        entity: "CLM-2025-001", user: "Chris Kanyuka Jr", time: "2025-04-01 09:15:22" },
+        { module: "Claims",     action: "Update Status",   entity: "CLM-2025-001", user: "Grace Banda",      time: "2025-04-01 10:35:40" },
+        { module: "Policy",     action: "Issue",           entity: "POL-2025-002", user: "Chris Kanyuka Jr", time: "2025-04-01 10:05:18" },
+        { module: "Policy",     action: "Endorse",         entity: "POL-2025-002", user: "Chris Kanyuka Jr", time: "2025-04-01 11:20:03" },
+        { module: "Claims",     action: "Approve",         entity: "CLM-2025-001", user: "Jane Moyo",        time: "2025-04-01 13:45:55" },
+        { module: "Documents",  action: "Upload",          entity: "Policy Schedule POL-2025-001", user: "Chris Kanyuka Jr", time: "2025-04-01 14:10:12" },
+        { module: "Portfolio",  action: "Transfer (Confirm)", entity: "POL-2025-004", user: "Chris Kanyuka Jr", time: "2025-04-01 15:20:03" },
+      ]
+    };
+
+    // Very simple auth / role guard
+    const app = {
+      currentSession: null,
+
+      loadSession: function () {
+        const sess = localStorage.getItem("insuresuite-session");
+        if (sess) {
+          this.currentSession = JSON.parse(sess);
+        }
+      },
+
+      // Only allow SuperAdmin / BranchManager here
+      checkAccess: function () {
+        if (!this.currentSession) {
+          alert("No active session.");
+          window.location = "index.html";
+          return false;
+        }
+
+        const allowedRoles = ["SuperAdmin", "BranchManager"];
+        if (!allowedRoles.includes(this.currentSession.role)) {
+          alert("Access to Admin module is restricted.");
+          window.location = "dashboard.html";
+          return false;
+        }
+        return true;
+      },
+
+      renderUserRow: function (user) {
+        const branch = window.data.branches.find(b => b.id === user.branch) || {};
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = [
+          `<td>${user.name}</td>`,
+          `<td>${user.username}</td>`,
+          `<td>${user.role}</td>`,
+          `<td>${branch.name || "Unknown"}</td>`,
+          `<td>
+            ${(this.currentSession.role === "SuperAdmin" ||
+              (user.role === "BranchManager" && user.branch === this.currentSession.branchId))
+              ? `<button class="btn btn-xs btn-danger" data-id="${user.id}">Delete</button>`
+              : ""}
+          </td>`
+        ].join("");
+
+        return tr;
+      },
+
+      renderUsersTable: function () {
+        const tbody = document.querySelector("#usersTable tbody");
+        tbody.innerHTML = "";
+
+        window.data.users.forEach(user => {
+          const tr = this.renderUserRow(user);
+          tbody.appendChild(tr);
+        });
+
+        tbody.querySelectorAll("button").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            const userId = e.target.getAttribute("data-id");
+            const u = window.data.users.find(u => u.id === parseInt(userId));
+
+            if (confirm(`Delete user "${u?.name}"? This is demo‑only.`)) {
+              window.data.users = window.data.users.filter(u => u.id !== parseInt(userId));
+              this.renderUsersTable();
+            }
+          });
+        });
+      },
+
+      renderAuditTable: function () {
+        const tbody = document.querySelector("#auditTable tbody");
+        tbody.innerHTML = "";
+
+        window.data.auditLog.forEach(log => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = [
+            `<td>${log.module}</td>`,
+            `<td>${log.action}</td>`,
+            `<td>${log.entity}</td>`,
+            `<td>${log.user}</td>`,
+            `<td class="nowrap">${log.time}</td>`
+          ].join("");
+          tbody.appendChild(tr);
+        });
+      },
+
+      init: function () {
+        this.loadSession();
+        if (!this.checkAccess()) return;
+
+        const currentRole = document.getElementById("currentRole");
+        if (currentRole) {
+          currentRole.textContent = this.currentSession.role;
+        }
+
+        const newUserBtn   = document.getElementById("newUserBtn");
+        const newUserForm  = document.getElementById("newUserForm");
+        const cancelUserBtn = document.getElementById("cancelUserBtn");
+        const userForm     = document.getElementById("userForm");
+
+        // Toggle user form
+        newUserBtn.addEventListener("click", () => {
+          newUserForm.style.display = "block";
+        });
+
+        cancelUserBtn.addEventListener("click", () => {
+          newUserForm.style.display = "none";
+        });
+
+        // Add new user (demo only, no real DB)
+        userForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const name     = document.getElementById("userName").value.trim();
+          const username = document.getElementById("userUsername").value.trim();
+          const roleId   = parseInt(document.getElementById("userRole").value);
+          const branchId = parseInt(document.getElementById("userBranch").value);
+
+          // Map roleId to role string (demo shortcut)
+          const roleMap = {
+            1: "BranchManager",
+            2: "Underwriter",
+            3: "ClaimsHandler",
+            4: "FrontDesk",
+            5: "ReadOnly"
+          };
+          const role = roleMap[roleId] || "ReadOnly";
+
+          const maxId = window.data.users.reduce((m, u) => Math.max(m, u.id), 0) + 10;
+          window.data.users.push({
+            id: maxId,
+            name: name,
+            username: username,
+            role: role,
+            branch: branchId,
+            isActive: true
+          });
+
+          userForm.reset();
+          newUserForm.style.display = "none";
+          this.renderUsersTable();
+        });
+
+        this.renderUsersTable();
+        this.renderAuditTable();
+      }
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      app.init();
+    });
+  </script>
+</body>
+</html>
