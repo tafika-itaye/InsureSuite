@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>InsureSuite – Claims</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="claims-page">
+  <header class="suite-header">
+    <h1>InsureSuite</h1>
+    <div class="user-nav">
+      <span id="currentRole"></span> •
+      <a href="index.html" id="logoutBtn">Logout</a>
+    </div>
+  </header>
+
+  <nav class="main-menu">
+    <a href="dashboard.html" class="menu-item">Dashboard</a>
+    <a href="claims.html" class="menu-item active">Claims</a>
+    <a href="policies.html" class="menu-item">Policies</a>
+    <a href="crm.html" class="menu-item">CRM & Renewals</a>
+    <a href="portfolio.html" class="menu-item">Portfolio</a>
+    <a href="documents.html" class="menu-item">Documents</a>
+    <a href="admin.html" class="menu-item">Admin</a>
+  </nav>
+
+  <main class="claims-main">
+    <section class="section-header">
+      <h2>Claims</h2>
+      <button id="newClaimBtn" class="btn btn-primary">Register New Claim (FNOL)</button>
+    </section>
+
+    <div id="newClaimForm" class="form-card" style="display:none;">
+      <h3>Register Claim – FNOL</h3>
+      <form id="registerClaimForm">
+        <div class="form-row">
+          <label>Policy Number</label>
+          <input type="text" id="policyNoInput" required />
+        </div>
+        <div class="form-row">
+          <label>Date of Loss</label>
+          <input type="date" id="lossDateInput" required />
+        </div>
+        <div class="form-row">
+          <label>Loss Description</label>
+          <textarea id="lossDescInput" rows="3" required></textarea>
+        </div>
+        <div class="form-row">
+          <button type="submit" class="btn btn-primary">Create Claim</button>
+          <button type="button" id="cancelClaimBtn" class="btn btn-secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <table id="claimsTable" class="data-table">
+      <thead>
+        <tr>
+          <th>Claim #</th>
+          <th>Policy</th>
+          <th>Loss Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Ensure session
+      if (!app.hasSession()) {
+        window.location = "index.html";
+        return;
+      }
+
+      app.updateMainMenu();
+
+      // Show role in header
+      const currentRole = document.getElementById("currentRole");
+      if (currentRole && app.currentSession) {
+        currentRole.textContent = app.currentSession.role;
+      }
+
+      // Toggle new claim form
+      const newClaimBtn = document.getElementById("newClaimBtn");
+      const newClaimForm = document.getElementById("newClaimForm");
+      const cancelClaimBtn = document.getElementById("cancelClaimBtn");
+
+      newClaimBtn.addEventListener("click", () => {
+        newClaimForm.style.display = "block";
+      });
+
+      cancelClaimBtn.addEventListener("click", () => {
+        newClaimForm.style.display = "none";
+      });
+
+      // Register new claim (dummy – adds to in‑memory data)
+      const registerClaimForm = document.getElementById("registerClaimForm");
+      registerClaimForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const policyNo = document.getElementById("policyNoInput").value.trim();
+        const lossDate = document.getElementById("lossDateInput").value;
+        const lossDesc = document.getElementById("lossDescInput").value.trim();
+
+        const policy = window.data.policies.find(p => p.policyNo === policyNo);
+        if (!policy) {
+          alert("Policy not found. Please check the policy number.");
+          return;
+        }
+
+        const newClaimNo = `CLM-${Date.now().toString(36).slice(2, 6).toUpperCase()}`;
+        const newClaim = {
+          id: window.data.claims.reduce((max, c) => Math.max(max, c.id), 0) + 1000,
+          claimNo: newClaimNo,
+          policy: policy.id,
+          lossDate: lossDate,
+          status: "Registered",
+          notes: lossDesc
+        };
+
+        window.data.claims.push(newClaim);
+        newClaimForm.reset();
+        newClaimForm.style.display = "none";
+        renderClaimsTable();
+      });
+
+      // Claims table body
+      const claimsTableBody = document.querySelector("#claimsTable tbody");
+      function renderClaimsTable() {
+        // Clear tbody
+        claimsTableBody.innerHTML = "";
+
+        window.data.claims.forEach(claim => {
+          const policy = window.data.policies.find(p => p.id === claim.policy) || {};
+          const tr = document.createElement("tr");
+
+          tr.innerHTML = [
+            `<td>${claim.claimNo}</td>`,
+            `<td>${policy.policyNo || "Unknown"}</td>`,
+            `<td>${claim.lossDate}</td>`,
+            `<td><span class="status-pill ${getStatusClass(claim.status)}">${claim.status}</span></td>`,
+            `<td>
+              <button class="btn btn-xs btn-primary" data-claim="${claim.id}">View</button>
+              ${(app.currentSession?.role === "ClaimsHandler" || app.currentSession?.role === "BranchManager")
+                ? `<button class="btn btn-xs btn-primary" data-claim="${claim.id}">Approve</button>` : ""}
+            </td>`
+          ].join("");
+
+          claimsTableBody.appendChild(tr);
+        });
+
+        // Dummy click handlers for View/Approve
+        claimsTableBody.querySelectorAll("button").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            const claimId = e.target.getAttribute("data-claim");
+            const claim = window.data.claims.find(c => c.id === parseInt(claimId));
+            alert(`Viewing/Approving claim: ${claim?.claimNo} (status: ${claim?.status})`);
+          });
+        });
+      }
+
+      function getStatusClass(status) {
+        switch (status) {
+          case "Registered": return "status-yellow";
+          case "Assessing":  return "status-orange";
+          case "Approved":   return "status-green";
+          case "Closed":     return "status-blue";
+          case "Repudiated": return "status-red";
+          default:           return "status-gray";
+        }
+      }
+
+      renderClaimsTable();
+    });
+  </script>
+</body>
+  </html>
