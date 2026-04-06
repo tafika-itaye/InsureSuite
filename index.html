@@ -1,262 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>DeviceShield — National Stolen Device Register</title>
-<link rel="stylesheet" href="css/main.css"/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Home | InsureSuite</title>
+  <link rel="stylesheet" href="css/style.css">
+  
 </head>
 <body>
-<!-- NAV -->
-<nav class="navbar" id="navbar">
-  <div class="nav-container">
-    <a href="index.html" class="nav-brand">
-      <span class="brand-icon">🛡️</span>
-      <span class="brand-name">DeviceShield</span>
-    </a>
-    <button class="nav-toggle" id="navToggle" aria-label="Menu">&#9776;</button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="index.html" class="active">Home</a></li>
-      <li><a href="pages/about.html">About</a></li>
-      <li><a href="pages/check.html">Check Device</a></li>
-      <li><a href="pages/register-device.html">Report Stolen</a></li>
-      <li><a href="pages/how-it-works.html">How It Works</a></li>
-      <li><a href="pages/faq.html">FAQ</a></li>
-      <li><a href="pages/contact.html">Contact</a></li>
-      <li><a href="login.html" class="btn-nav">Login / Portal</a></li>
-    </ul>
-  </div>
+<nav class="nav">
+  <div class="nav-brand">Insure<span>Suite</span></div>
+  <ul class="nav-links">
+    <li><a href="#products">Products</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#brokers">Brokers</a></li>
+    <li><a href="quotes.html">Get a Quote</a></li>
+    <li><a href="login.html" class="nav-cta">Login</a></li>
+  </ul>
+  <button class="nav-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
-  <div class="hero-overlay"></div>
-  <div class="hero-content">
-    <span class="hero-badge">🌍 National Registry · Malawi & Beyond</span>
-    <h1>Protect Your Devices.<br/>Recover What's Lost.</h1>
-    <p>DeviceShield is the authoritative national platform for reporting, tracking, and verifying stolen mobile phones, laptops, and electronic devices. Real-time IMEI checking. Instant reporting. Trusted by law enforcement.</p>
-    <div class="hero-actions">
-      <a href="pages/register-device.html" class="btn-primary btn-lg">📋 Report Stolen Device</a>
-      <a href="pages/check.html" class="btn-outline btn-lg">🔍 Check IMEI / Serial</a>
+  <div class="hero-badge">🇲🇼 Malawi's Premier Insurance Platform</div>
+  <h1>Protect What <span>Matters Most</span><br>With InsureSuite</h1>
+  <p>Comprehensive insurance solutions for individuals, families, and businesses across Malawi — backed by a world-class digital platform.</p>
+  <a href="quotes.html" class="btn btn-primary">Get a Free Quote</a>
+  <a href="login.html" class="btn btn-outline">Access ERP Portal</a>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">4,200+</div><div class="stat-label">Policies Active</div></div>
+    <div class="stat"><div class="stat-num">MK 2.8B</div><div class="stat-label">Claims Paid</div></div>
+    <div class="stat"><div class="stat-num">98%</div><div class="stat-label">Renewal Rate</div></div>
+    <div class="stat"><div class="stat-num">32</div><div class="stat-label">Broker Partners</div></div>
+  </div>
+</section>
+
+<section id="products">
+  <div class="section-title">
+    <h2>Insurance Products</h2>
+    <p>Tailored coverage for every stage of life and business</p>
+  </div>
+  <div class="grid-3">
+    <div class="card"><div class="card-icon">🚗</div><h3>Motor Insurance</h3><p>Comprehensive & third-party cover for all vehicles. Fast claims processing within 72 hours.</p></div>
+    <div class="card"><div class="card-icon">🏥</div><h3>Health Insurance</h3><p>Individual and group medical cover — inpatient, outpatient, and dental benefits.</p></div>
+    <div class="card"><div class="card-icon">🏠</div><h3>Property Insurance</h3><p>Home and commercial property cover against fire, theft, flood, and natural disasters.</p></div>
+    <div class="card"><div class="card-icon">❤️</div><h3>Life Insurance</h3><p>Term, whole life, and endowment plans. Secure your family's future starting from MK 3,500/month.</p></div>
+    <div class="card"><div class="card-icon">✈️</div><h3>Travel Insurance</h3><p>Regional and international travel cover including medical evacuation and trip cancellation.</p></div>
+    <div class="card"><div class="card-icon">🏢</div><h3>Business Insurance</h3><p>Group schemes, directors & officers liability, and professional indemnity for enterprises.</p></div>
+  </div>
+</section>
+
+<section id="features" style="background:var(--primary);">
+  <div class="section-title">
+    <h2 style="color:#fff;">Why Choose InsureSuite?</h2>
+    <p style="color:rgba(255,255,255,.6);">Industry-leading technology meets local expertise</p>
+  </div>
+  <div class="grid-4">
+    <div class="card" style="background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);">
+      <div class="card-icon">⚡</div><h3 style="color:#fff;">Real-Time Dashboard</h3>
+      <p style="color:rgba(255,255,255,.6);">Live metrics on policies, claims, and renewals — all in one place.</p>
     </div>
-    <div class="hero-stats">
-      <div class="stat"><span class="stat-num">48,291</span><span class="stat-label">Devices Registered</span></div>
-      <div class="stat"><span class="stat-num">12,740</span><span class="stat-label">Recoveries Facilitated</span></div>
-      <div class="stat"><span class="stat-num">380+</span><span class="stat-label">Partner Agencies</span></div>
-      <div class="stat"><span class="stat-num">99.8%</span><span class="stat-label">Uptime SLA</span></div>
+    <div class="card" style="background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);">
+      <div class="card-icon">📱</div><h3 style="color:#fff;">Mobile First</h3>
+      <p style="color:rgba(255,255,255,.6);">Full ERP access on any device — phone, tablet, or desktop.</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);">
+      <div class="card-icon">🔒</div><h3 style="color:#fff;">Secure & Compliant</h3>
+      <p style="color:rgba(255,255,255,.6);">Role-based access, audit trails, and IAIS-compliant reporting.</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);">
+      <div class="card-icon">🤝</div><h3 style="color:#fff;">Broker Portal</h3>
+      <p style="color:rgba(255,255,255,.6);">Dedicated broker commissions, pipeline tracking, and renewals.</p>
     </div>
   </div>
 </section>
 
-<!-- QUICK CHECK BANNER -->
-<section class="quick-check">
-  <div class="container">
-    <div class="quick-check-inner">
-      <div class="qc-text">
-        <h2>Instant IMEI Check</h2>
-        <p>Before buying a second-hand device, verify it hasn't been reported stolen.</p>
-      </div>
-      <form class="qc-form" onsubmit="quickCheck(event)">
-        <input type="text" id="imeiInput" placeholder="Enter IMEI or Serial Number" maxlength="20"/>
-        <button type="submit" class="btn-primary">Check Now</button>
-      </form>
-      <div id="qcResult" class="qc-result hidden"></div>
-    </div>
+<section id="brokers">
+  <div class="section-title"><h2>Become a Broker Partner</h2><p>Join Malawi's fastest growing insurance distribution network</p></div>
+  <div style="max-width:700px;margin:0 auto;text-align:center;">
+    <p style="font-size:1.05rem;color:#6b7c93;margin-bottom:2rem;">Earn competitive commissions, access our full product suite, and manage your entire book of business through the InsureSuite broker portal.</p>
+    <a href="quotes.html" class="btn btn-primary">Partner With Us</a>
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
-<section class="section section-light" id="how">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-tag">Simple Process</span>
-      <h2>How DeviceShield Works</h2>
-      <p>Three steps between a stolen device and its recovery.</p>
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <h3>Insure<span>Suite</span></h3>
+      <p>Digital insurance solutions built for Malawi and the region.</p>
     </div>
-    <div class="steps-grid">
-      <div class="step-card">
-        <div class="step-num">01</div>
-        <div class="step-icon">📝</div>
-        <h3>Report Your Device</h3>
-        <p>Submit your device details — IMEI, make, model, and incident details. Get a unique case reference instantly.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-num">02</div>
-        <div class="step-icon">🔗</div>
-        <h3>Registry Broadcast</h3>
-        <p>Your report is broadcast to law enforcement, border agencies, telecom partners, and verified resellers nationwide.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-num">03</div>
-        <div class="step-icon">✅</div>
-        <h3>Track & Recover</h3>
-        <p>Monitor your case status through your portal. Get notified the moment your device is flagged or recovered.</p>
-      </div>
-    </div>
+    <div class="footer-links"><h4>Products</h4><ul>
+      <li><a href="#">Motor</a></li><li><a href="#">Health</a></li>
+      <li><a href="#">Life</a></li><li><a href="#">Property</a></li>
+    </ul></div>
+    <div class="footer-links"><h4>Company</h4><ul>
+      <li><a href="#">About Us</a></li><li><a href="#">Careers</a></li>
+      <li><a href="#">News</a></li><li><a href="#">Contact</a></li>
+    </ul></div>
+    <div class="footer-links"><h4>Legal</h4><ul>
+      <li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Use</a></li>
+      <li><a href="#">Complaints</a></li>
+    </ul></div>
   </div>
-</section>
-
-<!-- FEATURES -->
-<section class="section" id="features">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-tag">Platform Capabilities</span>
-      <h2>Built for Individuals, Law Enforcement & Enterprises</h2>
-    </div>
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">📱</div>
-        <h3>Multi-Device Support</h3>
-        <p>Report smartphones, tablets, laptops, smartwatches, cameras, and any electronic device with a serial number.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔔</div>
-        <h3>Real-Time Alerts</h3>
-        <p>Instant SMS and email notifications when a registered device is flagged at a checkpoint or verified reseller.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🏛️</div>
-        <h3>Law Enforcement Portal</h3>
-        <p>Dedicated agency dashboard with bulk query, case management, and inter-agency communication tools.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🏢</div>
-        <h3>Enterprise Fleet Management</h3>
-        <p>Register and monitor entire corporate device fleets. Bulk IMEI upload, department tagging, and asset reporting.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔐</div>
-        <h3>Secure & Verified</h3>
-        <p>End-to-end encrypted submissions. Identity verification for reporters. Tamper-proof audit trails.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📊</div>
-        <h3>Analytics & Reporting</h3>
-        <p>National theft trend maps, hotspot analysis, recovery rates, and monthly statistical reports.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- WHO USES -->
-<section class="section section-light">
-  <div class="container">
-    <div class="section-header">
-      <span class="section-tag">Who We Serve</span>
-      <h2>Trusted by Every Stakeholder</h2>
-    </div>
-    <div class="audience-grid">
-      <div class="audience-card">
-        <div class="aud-icon">👤</div>
-        <h3>Individuals</h3>
-        <ul>
-          <li>Report stolen phones instantly</li>
-          <li>Track recovery case status</li>
-          <li>Verify before purchasing used devices</li>
-          <li>Get proof of ownership certificate</li>
-        </ul>
-        <a href="pages/register-device.html" class="btn-outline-sm">Report Now</a>
-      </div>
-      <div class="audience-card featured">
-        <div class="aud-badge">Most Used</div>
-        <div class="aud-icon">🚔</div>
-        <h3>Law Enforcement</h3>
-        <ul>
-          <li>Instant IMEI batch verification</li>
-          <li>Cross-agency case collaboration</li>
-          <li>Evidence chain management</li>
-          <li>Stolen device interception logs</li>
-        </ul>
-        <a href="login.html" class="btn-primary-sm">Agency Portal</a>
-      </div>
-      <div class="audience-card">
-        <div class="aud-icon">🏪</div>
-        <h3>Resellers & Retailers</h3>
-        <ul>
-          <li>Verify stock before purchase</li>
-          <li>Bulk IMEI clearance checks</li>
-          <li>Partner certification badge</li>
-          <li>API integration for POS systems</li>
-        </ul>
-        <a href="pages/contact.html" class="btn-outline-sm">Become a Partner</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- TRUST SIGNALS -->
-<section class="section">
-  <div class="container">
-    <div class="trust-strip">
-      <div class="trust-item">🏛️ Government Endorsed</div>
-      <div class="trust-item">🔒 256-bit Encrypted</div>
-      <div class="trust-item">📡 24/7 Live Registry</div>
-      <div class="trust-item">🌐 API Available</div>
-      <div class="trust-item">✅ ISO 27001 Aligned</div>
-    </div>
-  </div>
-</section>
-
-<!-- CTA -->
-<section class="cta-section">
-  <div class="container">
-    <div class="cta-inner">
-      <h2>Your Device Was Stolen?</h2>
-      <p>Every minute counts. Register your device now and activate national-level tracking within seconds.</p>
-      <div class="cta-actions">
-        <a href="pages/register-device.html" class="btn-primary btn-lg">Report Stolen Device</a>
-        <a href="login.html" class="btn-white btn-lg">Access Your Portal</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="container">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <span class="brand-icon">🛡️</span>
-        <span class="brand-name">DeviceShield</span>
-        <p>The national stolen device registry platform. Protecting citizens and enabling recovery since 2022.</p>
-      </div>
-      <div class="footer-col">
-        <h4>Platform</h4>
-        <ul>
-          <li><a href="pages/check.html">Check IMEI</a></li>
-          <li><a href="pages/register-device.html">Report Stolen</a></li>
-          <li><a href="login.html">Login / Portal</a></li>
-          <li><a href="pages/how-it-works.html">How It Works</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Organisation</h4>
-        <ul>
-          <li><a href="pages/about.html">About Us</a></li>
-          <li><a href="pages/faq.html">FAQ</a></li>
-          <li><a href="pages/contact.html">Contact</a></li>
-          <li><a href="pages/privacy.html">Privacy Policy</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Partners</h4>
-        <ul>
-          <li><a href="#">Law Enforcement Portal</a></li>
-          <li><a href="#">Telecom Integration</a></li>
-          <li><a href="#">Reseller Programme</a></li>
-          <li><a href="#">API Docs</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>© 2026 DeviceShield. All rights reserved.</p>
-      <p>Built for Malawi · Expandable Nationally</p>
-    </div>
+  <div class="footer-bottom">
+    <span>© 2026 InsureSuite Malawi. Regulated by the Reserve Bank of Malawi.</span>
+    <span>Blantyre | Lilongwe | Mzuzu</span>
   </div>
 </footer>
-
-<script src="js/main.js"></script>
-</body>
-</html>
+<script src="js/app.js"></script></body></html>
